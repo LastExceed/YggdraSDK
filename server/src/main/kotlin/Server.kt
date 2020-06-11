@@ -10,7 +10,7 @@ import java.net.InetSocketAddress
 
 class Server {
 	private val rootId = IdDispenser.next()
-	private val tree = mutableMapOf(Pair(rootId, Node(rootId, "rootuser", "this is the root node", NodeId(-1))))
+	private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {

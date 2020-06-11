@@ -56,7 +56,7 @@ class MainView : View("YggdraChat") {
 			}
 		}
 		textarea {
-			onKeyPressed = EventHandler<KeyEvent> {
+			onKeyPressed = EventHandler {
 				if (it.code != KeyCode.ENTER || !it.isControlDown) {
 					return@EventHandler
 				}
