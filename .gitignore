@@ -32,5 +32,3 @@ hs_err_pid*
 #client/build/
 #server/build/
 .gradle/
-
-

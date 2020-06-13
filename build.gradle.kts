@@ -55,6 +55,6 @@ project(":client") {
 	}
 	dependencies {
 		implementation(project(":common"))
-		implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
+		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
 	}
 }

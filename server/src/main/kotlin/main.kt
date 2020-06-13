@@ -1,13 +1,6 @@
 import kotlinx.coroutines.*
 
-fun main() {
+suspend fun main() {
 	val server = Server()
-	runBlocking {
-		server.start()
-	}
-	val userInput = run {
-		val userInput = readLine()!!
-		//ensure its numeric
-		userInput.toInt()
-	}
+	server.start()
 }

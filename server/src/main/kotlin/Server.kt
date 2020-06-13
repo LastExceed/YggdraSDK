@@ -33,7 +33,7 @@ class Server {
 		val versionMatch = clientVersion == Globals.protocolVersion
 		writer.writeBoolean(versionMatch)
 		if (!versionMatch) {
-			client.close()
+			client.dispose()
 			return
 		}
 
@@ -50,15 +50,15 @@ class Server {
 		)
 		sessions.add(newSession)
 
+		val map = mapOf(
+			PacketId.NODE_CREATE to ::onPacketNodeCreate,
+			PacketId.GOTO to ::onPacketGoTo
+		)
+
 		while (true) {
 			val packetID = PacketId(newSession.reader.readByte())
-			when (packetID) {
-				PacketId.NODE_CREATE -> onPacketNodeCreate(newSession)
-				PacketId.GOTO -> onPacketGoTo(newSession)
-				else -> {
-					error("unknown packet ID: $packetID")
-				}
-			}
+			val packetHandler = map[packetID] ?: error("unknown packet ID: $packetID")
+			packetHandler(newSession)
 		}
 	}
 
