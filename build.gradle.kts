@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.3.61"
+	kotlin("jvm") version "1.4-M2"
 	id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
@@ -11,7 +11,7 @@ allprojects {
 
 	tasks.withType<KotlinCompile> {
 		kotlinOptions {
-			jvmTarget = "11"
+			jvmTarget = "13"
 			freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 		}
 	}
@@ -23,16 +23,18 @@ subprojects {
 
 	repositories {
 		mavenCentral()
+		setOf(
+			"kotlin-eap",
+			"ktor",
+			"kotlinx"
+		).forEach {
+			maven("https://dl.bintray.com/kotlin/$it")
+		}
 	}
 
 	dependencies {
 		implementation(kotlin("stdlib-jdk8"))
-		implementation("io.ktor", "ktor-network", "1.2.3")
-	}
-
-	java {
-		targetCompatibility = JavaVersion.VERSION_11
-		sourceCompatibility = JavaVersion.VERSION_11
+		implementation("io.ktor", "ktor-network", "1.3.2-1.4-M2")
 	}
 }
 
@@ -48,7 +50,7 @@ project(":client") {
 		maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
 	}
 	javafx {
-		version = "13.0.1"
+		version = "14"
 		modules(
 			"javafx.controls",
 			"javafx.fxml",
@@ -59,6 +61,6 @@ project(":client") {
 	}
 	dependencies {
 		implementation(project(":common"))
-		implementation("no.tornado:tornadofx:2.0.0-SNAPSHOT")
+		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
 	}
 }

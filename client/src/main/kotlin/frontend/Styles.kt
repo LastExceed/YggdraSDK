@@ -1,8 +1,7 @@
 package frontend
 
-import javafx.scene.paint.*
-import javafx.scene.text.FontWeight
-import tornadofx.*
+import tornadofx.Stylesheet
+import tornadofx.cssclass
 
 class Styles : Stylesheet() {
 	companion object {

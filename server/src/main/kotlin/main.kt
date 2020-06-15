@@ -1,8 +1,4 @@
-import kotlinx.coroutines.runBlocking
-
-fun main() {
+suspend fun main() {
 	val server = Server()
-	runBlocking {
-		server.start()
-	}
+	server.start()
 }

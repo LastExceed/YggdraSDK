@@ -6,7 +6,6 @@ import javafx.event.EventHandler
 import javafx.scene.control.ListView
 import javafx.scene.control.TextInputDialog
 import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import kotlinx.coroutines.runBlocking
 import tornadofx.*
 
@@ -23,7 +22,6 @@ class MainView : View("YggdraChat") {
 		val dialogResult = dialog.showAndWait()
 		username = dialogResult.get()
 
-		//networker = Networker("127.0.0.1", Globals.port, username)
 		runAsync {
 			runBlocking {
 				Networker.connect(username)
@@ -56,7 +54,7 @@ class MainView : View("YggdraChat") {
 			}
 		}
 		textarea {
-			onKeyPressed = EventHandler<KeyEvent> {
+			onKeyPressed = EventHandler {
 				if (it.code != KeyCode.ENTER || !it.isControlDown) {
 					return@EventHandler
 				}
@@ -77,6 +75,7 @@ class MainView : View("YggdraChat") {
 	private fun goTo(target: ObservableNode) {
 		chatPath.clear()
 		target.children.clear()//these are outdated, server will provide current
+		//todo: use timestamp for differential update
 
 		fun addAfterParent(node: ObservableNode) {
 			if (node.parent != null) addAfterParent(node.parent)

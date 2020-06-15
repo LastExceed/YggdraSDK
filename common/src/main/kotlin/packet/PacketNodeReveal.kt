@@ -2,9 +2,7 @@ package packet
 
 import Node
 import NodeId
-import kotlinx.coroutines.io.ByteReadChannel
-import kotlinx.coroutines.io.ByteWriteChannel
-import kotlinx.coroutines.io.writeStringUtf8
+import io.ktor.utils.io.*
 
 data class PacketNodeReveal(
 	val node: Node

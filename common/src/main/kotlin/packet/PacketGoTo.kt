@@ -1,7 +1,7 @@
 package packet
 
 import NodeId
-import kotlinx.coroutines.io.*
+import io.ktor.utils.io.*
 
 data class PacketGoTo(
 	val position: NodeId

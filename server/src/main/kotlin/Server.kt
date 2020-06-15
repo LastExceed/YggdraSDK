@@ -1,16 +1,14 @@
-import io.ktor.network.selector.ActorSelectorManager
-import io.ktor.network.sockets.Socket
-import io.ktor.network.sockets.aSocket
-import io.ktor.network.sockets.openReadChannel
-import io.ktor.network.sockets.openWriteChannel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.io.writeBoolean
+import io.ktor.network.sockets.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import io.ktor.utils.io.writeBoolean
+import kotlinx.coroutines.launch
 import packet.*
-import java.net.InetSocketAddress
 
 class Server {
 	private val rootId = IdDispenser.next()
-	private val tree = mutableMapOf(Pair(rootId, Node(rootId, "rootuser", "this is the root node", NodeId(-1))))
+	private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
@@ -33,7 +31,7 @@ class Server {
 		val versionMatch = clientVersion == Globals.protocolVersion
 		writer.writeBoolean(versionMatch)
 		if (!versionMatch) {
-			client.close()
+			client.dispose()
 			return
 		}
 
@@ -50,15 +48,15 @@ class Server {
 		)
 		sessions.add(newSession)
 
+		val map = mapOf(
+			PacketId.NODE_CREATE to ::onPacketNodeCreate,
+			PacketId.GOTO to ::onPacketGoTo
+		)
+
 		while (true) {
 			val packetID = PacketId(newSession.reader.readByte())
-			when (packetID) {
-				PacketId.NODE_CREATE -> onPacketNodeCreate(newSession)
-				PacketId.GOTO -> onPacketGoTo(newSession)
-				else -> {
-					error("unknown packet ID: $packetID")
-				}
-			}
+			val packetHandler = map[packetID] ?: error("unknown packet ID: $packetID")
+			packetHandler(newSession)
 		}
 	}
 

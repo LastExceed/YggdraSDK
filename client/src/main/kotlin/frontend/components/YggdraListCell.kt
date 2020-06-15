@@ -28,6 +28,9 @@ class YggdraListCell : ListCell<ObservableNode>() {
 					println("edit history requested")
 				}
 			}
+			item("invalidate") {
+				println("trying to invalidate")
+			}
 		}
 	}
 }
