@@ -1,12 +1,10 @@
-import io.ktor.network.selector.ActorSelectorManager
-import io.ktor.network.sockets.Socket
-import io.ktor.network.sockets.aSocket
-import io.ktor.network.sockets.openReadChannel
-import io.ktor.network.sockets.openWriteChannel
-import kotlinx.coroutines.*
+import io.ktor.network.sockets.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.io.writeBoolean
+import kotlinx.coroutines.launch
 import packet.*
-import java.net.InetSocketAddress
 
 class Server {
 	private val rootId = IdDispenser.next()

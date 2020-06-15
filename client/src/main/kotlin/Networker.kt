@@ -1,18 +1,11 @@
 import frontend.components.ObservableNode
-import io.ktor.network.selector.ActorSelectorManager
 import io.ktor.network.sockets.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.io.ByteReadChannel
 import kotlinx.coroutines.io.ByteWriteChannel
 import packet.*
 import tornadofx.runLater
-import java.net.InetSocketAddress
-import kotlin.coroutines.CoroutineContext
 
 object Networker {
-	//override val coroutineContext: CoroutineContext = Dispatchers.IO
-
 	private lateinit var socket: Socket
 	private lateinit var reader: ByteReadChannel
 	private lateinit var writer: ByteWriteChannel
@@ -31,7 +24,7 @@ object Networker {
 		writer.writePacketGoTo(PacketGoTo(NodeId(0L)))
 		while (true) {
 			val packetID = PacketId(reader.readByte())
-			when (packetID) {
+			when (packetID) { //use a map instead
 				PacketId.NODE_REVEAL -> onPacketNodeReveal()
 
 				else -> error("unknown packetId: $packetID")
