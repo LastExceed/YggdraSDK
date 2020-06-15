@@ -1,9 +1,7 @@
 package packet
 
 import NodeId
-import kotlinx.coroutines.io.ByteReadChannel
-import kotlinx.coroutines.io.ByteWriteChannel
-import kotlinx.coroutines.io.writeStringUtf8
+import io.ktor.utils.io.*
 
 data class PacketNodeCreate(
 	val parentId: NodeId,

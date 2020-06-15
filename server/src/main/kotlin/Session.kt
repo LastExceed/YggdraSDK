@@ -1,6 +1,5 @@
 import io.ktor.network.sockets.Socket
-import kotlinx.coroutines.io.ByteReadChannel
-import kotlinx.coroutines.io.ByteWriteChannel
+import io.ktor.utils.io.*
 
 class Session(
 	val socket: Socket,

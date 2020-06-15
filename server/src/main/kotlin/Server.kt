@@ -2,7 +2,7 @@ import io.ktor.network.sockets.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.io.writeBoolean
+import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.launch
 import packet.*
 

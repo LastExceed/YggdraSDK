@@ -1,7 +1,6 @@
 import frontend.components.ObservableNode
 import io.ktor.network.sockets.*
-import kotlinx.coroutines.io.ByteReadChannel
-import kotlinx.coroutines.io.ByteWriteChannel
+import io.ktor.utils.io.*
 import packet.*
 import tornadofx.runLater
 

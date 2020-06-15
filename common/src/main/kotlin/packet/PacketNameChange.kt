@@ -1,6 +1,6 @@
 package packet
 
-import kotlinx.coroutines.io.*
+import io.ktor.utils.io.*
 
 data class PacketNameChange(
 	val name: String

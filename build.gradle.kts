@@ -23,12 +23,18 @@ subprojects {
 
 	repositories {
 		mavenCentral()
-		maven("https://dl.bintray.com/kotlin/kotlin-eap")
+		setOf(
+			"kotlin-eap",
+			"ktor",
+			"kotlinx"
+		).forEach {
+			maven("https://dl.bintray.com/kotlin/$it")
+		}
 	}
 
 	dependencies {
 		implementation(kotlin("stdlib-jdk8"))
-		implementation("io.ktor", "ktor-network", "1.2.3")
+		implementation("io.ktor", "ktor-network", "1.3.2-1.4-M2")
 	}
 }
 
