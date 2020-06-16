@@ -1,6 +1,6 @@
 .gradle/
 .idea/
 
-**/build/
-!**/src/**/build/
-!**/test/**/build/
+build/
+!src/**/build/
+!test/**/build/
