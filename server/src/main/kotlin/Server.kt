@@ -1,14 +1,17 @@
-import io.ktor.network.sockets.*
+import database.Database
+import io.ktor.network.sockets.Socket
+import io.ktor.network.sockets.openReadChannel
+import io.ktor.network.sockets.openWriteChannel
+import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.launch
 import packet.*
 
 class Server {
-	private val rootId = IdDispenser.next()
-	private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
+	//private val rootId = IdDispenser.next()
+	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
@@ -64,7 +67,9 @@ class Server {
 
 	private suspend fun onPacketGoTo(source: Session) {
 		val jump = source.reader.readPacketGoTo()
-		source.position = tree[jump.position]!!
+		source.position = Database.getNode(jump.position)
+			?: throw Exception("Node with ID ${jump.position} not found")
+		//source.position = tree[jump.position]!!
 		source.position.children.forEach {
 			source.writer.writePacketNodeReveal(PacketNodeReveal(it))
 		}
@@ -73,15 +78,17 @@ class Server {
 	private suspend fun onPacketNodeCreate(source: Session) {
 		val nodeCreation = source.reader.readPacketNodeCreate()
 
-		val newNode = Node(
-			id = IdDispenser.next(),
-			author = source.username,
-			message = nodeCreation.message,
-			parentId = nodeCreation.parentId
-		)
-		tree[newNode.id] = newNode
-		val parent = tree[newNode.parentId]!!
-		parent.children.add(newNode)
+		//val newNode = Node(
+		//	id = IdDispenser.next(),
+		//	author = IdUser(Database.getUserID(source.username)),
+		//	snapshot = Snapshot(nodeCreation.message)
+		//	parentId = nodeCreation.parentId
+		//)
+
+		val newNode = Database.createNode(Database.getUserID(source.username), nodeCreation.message, nodeCreation.parentId)
+		//tree[newNode.id] = newNode
+		//val parent = tree[newNode.parentId]!!
+		//parent.children.add(newNode)
 
 		val nodeRevelation = PacketNodeReveal(newNode)
 		for (session in sessions) {
