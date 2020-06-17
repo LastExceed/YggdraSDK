@@ -1,14 +1,14 @@
 package packet
 
-import NodeId
+import IdNode
 import io.ktor.utils.io.*
 
 data class PacketGoTo(
-	val position: NodeId
+	val position: IdNode
 ) : Packet(PacketId.GOTO)
 
 suspend fun ByteReadChannel.readPacketGoTo(): PacketGoTo {
-	return PacketGoTo(NodeId(this.readLong()))
+	return PacketGoTo(IdNode(this.readLong()))
 }
 
 suspend fun ByteWriteChannel.writePacketGoTo(packet: PacketGoTo) {

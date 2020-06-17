@@ -20,7 +20,7 @@ object Networker {
 			error("outdated")
 		}
 		writer.writePacketNameChange(PacketNameChange(username))
-		writer.writePacketGoTo(PacketGoTo(NodeId(0L)))
+		writer.writePacketGoTo(PacketGoTo(IdNode(0L)))
 		while (true) {
 			val packetID = PacketId(reader.readByte())
 			when (packetID) { //use a map instead
@@ -40,7 +40,7 @@ object Networker {
 		val newObservableNode = ObservableNode(
 			id = newNode.id,
 			author = newNode.author,
-			message = newNode.message,
+			message = newNode.snapshot,
 			parent = Tree.allNodes[newNode.parentId]!!
 		)
 

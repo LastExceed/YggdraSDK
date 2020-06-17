@@ -1,10 +1,10 @@
 package frontend.components
 
-import NodeId
+import IdNode
 import tornadofx.observableListOf
 
 data class ObservableNode(
-	val id: NodeId,
+	val id: IdNode,
 	val author: String,
 	val message: String,
 	val parent: ObservableNode?
