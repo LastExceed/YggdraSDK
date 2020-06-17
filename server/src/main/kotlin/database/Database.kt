@@ -1,8 +1,17 @@
 package database
 
-import NodeId
-import database.tables.*
+import Node
+import IdNode
+import Snapshot
+import IdUser
+import database.tables.TableNode
+import database.tables.TableSnapshot
+import database.tables.TableUser
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
+import java.time.Instant
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 import org.jetbrains.exposed.sql.transactions.*
 import java.sql.Connection
@@ -43,13 +52,19 @@ object Database {
 		}
 	}
 
-	fun createUser(userName: String, userID: Long) {
-		transaction {
-			TableUser.insertIgnore {
-				it[id] = userID
-				it[name] = userName
-			}
+	fun tryCreateUser(userName: String): Long {
+		return transaction {
+			val query = TableUser.select { TableUser.name eq userName }.firstOrNull()
+				?: return@transaction TableUser.insert {
+					it[name] = userName
+				} get TableUser.id
+			return@transaction query[TableUser.id]
 		}
+	}
+
+	fun getUserID(name: String): Long {
+		val query = TableUser.select { TableUser.name eq name }
+		return query.firstOrNull()?.get(TableUser.id) ?: throw Exception("User with name: $name does not exist")
 	}
 
 	fun addSnapshot(content: String, parent: Long) = createSnapshot(content, parent)
