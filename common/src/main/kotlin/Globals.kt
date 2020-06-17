@@ -7,4 +7,5 @@ object Globals {
 	const val protocolVersion = 1
 	val serverAddress = InetSocketAddress("127.0.0.1", 12321)
 	val tcpSocketBuilder = aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
+	const val messageSizeLimit = 2000
 }
