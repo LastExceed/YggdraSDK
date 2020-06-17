@@ -34,13 +34,13 @@ object Networker {
 	private suspend fun onPacketNodeReveal() {
 		val nodeRevelation = reader.readPacketNodeReveal()
 		val newNode = nodeRevelation.node
-		if (newNode.parentId.value == -1L) {
+		if (newNode.parentId?.value == -1L) {
 			error("root revealed")
 		}
 		val newObservableNode = ObservableNode(
 			id = newNode.id,
-			author = newNode.author,
-			message = newNode.snapshot,
+			author = newNode.author.value.toString(),
+			message = newNode.snapshot.content,
 			parent = Tree.allNodes[newNode.parentId]!!
 		)
 
