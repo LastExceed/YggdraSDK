@@ -35,7 +35,7 @@ object Database {
 	fun createNode(authorID: Long, content: String, parent: IdNode?): Node {
 		return transaction {
 			if (parent != null && !TableNode.exists { TableNode.id eq parent.value })
-				throw Exception("Parent does not exist")
+				error("Parent does not exist")
 
 			val snapshotPair = createSnapshot(content, parent = null)
 			val nodeID = TableNode.insertIgnore {
@@ -43,11 +43,10 @@ object Database {
 				it[this.parent] = parent?.value
 				it[this.lastSnapshot] = snapshotPair.second
 			} get TableNode.id
-
 			TableSnapshot.update(where = { TableSnapshot.id eq snapshotPair.second }) {
 				it[this.node] = nodeID
 			}
-			return@transaction Node(
+			Node(
 				IdNode(nodeID),
 				IdUser(authorID),
 				snapshotPair.first,
@@ -62,14 +61,14 @@ object Database {
 				?: return@transaction TableUser.insert {
 					it[name] = userName
 				} get TableUser.id
-			return@transaction query[TableUser.id]
+			query[TableUser.id]
 		}
 	}
 
 	fun getUserID(name: String): Long {
 		return transaction {
 			val query = TableUser.select { TableUser.name eq name }
-			return@transaction query.firstOrNull()?.get(TableUser.id) ?: throw Exception("User with name: $name does not exist")
+			query.firstOrNull()?.get(TableUser.id) ?: error("User with name: $name does not exist")
 		}
 	}
 
@@ -78,7 +77,7 @@ object Database {
 	private fun createSnapshot(content: String, parent: Long?): Pair<Snapshot, Long> {
 		val instant = Instant.now()
 		val snapshotId = transaction {
-			return@transaction TableSnapshot.insert {
+			TableSnapshot.insert {
 				it[this.content] = content
 				it[this.node] = parent
 				it[this.timestamp] = instant
@@ -88,14 +87,14 @@ object Database {
 	}
 
 	private fun FieldSet.exists(where: SqlExpressionBuilder.() -> Op<Boolean>): Boolean {
-		return this.select { where() }.count() > 0
+		return select { where() }.count() > 0
 	}
 
 	fun getNode(position: IdNode): Node? {
 		return transaction {
 			val query = TableNode.select { TableNode.id eq position.value }.firstOrNull()
 				?: return@transaction null
-			return@transaction Node(
+			val node = Node(
 				IdNode(position.value),
 				IdUser(query[TableNode.author]),
 				getSnapshot(query[TableNode.lastSnapshot])!!,
@@ -115,7 +114,7 @@ object Database {
 		return transaction {
 			val query = TableSnapshot.select { TableSnapshot.id eq messageId }.firstOrNull()
 				?: return@transaction null
-			return@transaction Snapshot(
+			Snapshot(
 				query[TableSnapshot.content],
 				query[TableSnapshot.timestamp]
 			)
