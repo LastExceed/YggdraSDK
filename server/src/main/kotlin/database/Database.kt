@@ -50,7 +50,7 @@ object Database {
 				IdNode(nodeID),
 				IdUser(authorID),
 				snapshotPair.first,
-				IdNode(nodeID)
+				parent
 			)
 		}
 	}
