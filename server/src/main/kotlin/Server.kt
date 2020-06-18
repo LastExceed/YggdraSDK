@@ -49,7 +49,7 @@ class Server {
 			reader,
 			writer,
 			nameChange.name,
-			Database.getNode(IdNode(0L))!!
+			IdNode(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
 
