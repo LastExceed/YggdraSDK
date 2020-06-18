@@ -42,8 +42,7 @@ class Server {
 			error("first packet must be a namechange")
 		}
 		val nameChange = reader.readPacketNameChange()
-		Database.tryCreateUser(nameChange.name)
-
+		Database.getOrCreateUser(nameChange.name)
 		val newSession = Session(
 			client,
 			reader,

@@ -56,7 +56,7 @@ object Database {
 		}
 	}
 
-	fun tryCreateUser(userName: String): Long {
+	fun getOrCreateUser(userName: String): Long {
 		return transaction {
 			val query = TableUser.select { TableUser.name eq userName }.firstOrNull()
 				?: return@transaction TableUser.insert {
