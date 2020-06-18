@@ -6,7 +6,8 @@ data class Node(
 	val snapshot: Snapshot,
 	val parentId: IdNode?
 ) {
-	val children = mutableListOf<Node>()
+	val children = mutableListOf<IdNode>()
+	//TODO: use immutable list in constructor
 }
 
 inline class IdNode(val value: Long)

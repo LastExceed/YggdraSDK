@@ -16,7 +16,7 @@ suspend fun ByteReadChannel.readPacketNodeCreate(): PacketNodeCreate {
 }
 
 suspend fun ByteWriteChannel.writePacketNodeCreate(packet: PacketNodeCreate) {
-	this.writeByte(packet.id.value)
+	this.writeByte(packet.id.value) //TODO: move to super-class
 	this.writeLong(packet.parentId.value)
 	this.writeStringUtf8(packet.message + '\n')
 }

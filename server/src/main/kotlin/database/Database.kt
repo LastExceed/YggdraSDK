@@ -14,8 +14,9 @@ import java.sql.Connection
 import java.time.Instant
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
+//TODO: add function to explicitly initialize this object
 object Database {
-	private val db: ExposedDatabase = ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC")
+	private val db: ExposedDatabase = ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC") //TODO: change to relative path
 
 	init {
 		db.useNestedTransactions = true
