@@ -29,7 +29,9 @@ class YggdraListCell : ListCell<ObservableNode>() {
 				}
 			}
 			item("invalidate") {
-				println("trying to invalidate")
+				action {
+					println("trying to invalidate")
+				}
 			}
 		}
 	}
