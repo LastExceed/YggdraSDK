@@ -24,6 +24,11 @@ object Database {
 		transaction {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
+			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
+				val idUserRoot = getOrCreateUser("rootuser")
+				createNode(idUserRoot, "root of all evil", null)
+			}
+
 		}
 	}
 
