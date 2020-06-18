@@ -103,6 +103,11 @@ object Database {
 					if(it != null) IdNode(it) else null
 				} //TODO fix this.rumhampelei
 			)
+
+			val query2 = TableNode.select { TableNode.parent eq node.id.value }//TODO: only query IDs instead of whole nodes
+			val children = query2.map { IdNode(it[TableNode.id]) }
+			node.children.addAll(children)
+			node
 		}
 	}
 
