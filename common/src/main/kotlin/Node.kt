@@ -1,17 +1,17 @@
 import java.time.Instant
 
 data class Node(
-	val id: IdNode,
-	val author: IdUser,
+	val id: NodeId,
+	val author: UserId,
 	val snapshot: Snapshot,
-	val parentId: IdNode?
+	val parentId: NodeId?
 ) {
-	val children = mutableListOf<IdNode>()
+	val children = mutableListOf<NodeId>()
 	//TODO: use immutable list in constructor
 }
 
-inline class IdNode(val value: Long)
+inline class NodeId(val value: Long)
 
-inline class IdUser(val value: Long)
+inline class UserId(val value: Long)
 
 data class Snapshot(val content: String, val date: Instant)

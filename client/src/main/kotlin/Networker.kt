@@ -20,7 +20,7 @@ object Networker {
 			error("outdated")
 		}
 		writer.writePacketNameChange(PacketNameChange(username))
-		writer.writePacketGoTo(PacketGoTo(IdNode(1L)))//TODO: dont hardcode root ID
+		writer.writePacketGoTo(PacketGoTo(NodeId(1L)))//TODO: dont hardcode root ID
 		while (true) {
 			val packetID = PacketId(reader.readByte())
 			when (packetID) { //use a map instead

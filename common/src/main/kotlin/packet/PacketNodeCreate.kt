@@ -1,16 +1,16 @@
 package packet
 
-import IdNode
+import NodeId
 import io.ktor.utils.io.*
 
 data class PacketNodeCreate(
-	val parentId: IdNode,
+	val parentId: NodeId,
 	val message: String
 ) : Packet(PacketId.NODE_CREATE)
 
 suspend fun ByteReadChannel.readPacketNodeCreate(): PacketNodeCreate {
 	return PacketNodeCreate(
-		IdNode(this.readLong()),
+		NodeId(this.readLong()),
 		this.readUTF8Line(999)!!
 	)
 }

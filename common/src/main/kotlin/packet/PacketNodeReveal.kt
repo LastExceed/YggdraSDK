@@ -1,8 +1,8 @@
 package packet
 
 import Globals
-import IdNode
-import IdUser
+import NodeId
+import UserId
 import Node
 import Snapshot
 import io.ktor.utils.io.*
@@ -15,10 +15,10 @@ data class PacketNodeReveal(
 suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 	return PacketNodeReveal(
 		Node(
-			id = IdNode(this.readLong()),
-			author = IdUser(this.readLong()),
+			id = NodeId(this.readLong()),
+			author = UserId(this.readLong()),
 			snapshot = Snapshot(this.readUTF8Line(Globals.messageSizeLimit)!!, this.readInstant()),
-			parentId = IdNode(this.readLong())
+			parentId = NodeId(this.readLong())
 		)
 	)
 }

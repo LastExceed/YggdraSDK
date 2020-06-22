@@ -6,5 +6,5 @@ class Session(
 	val reader: ByteReadChannel,
 	val writer: ByteWriteChannel,
 	val username: String,
-	var position: IdNode
+	var position: NodeId
 )

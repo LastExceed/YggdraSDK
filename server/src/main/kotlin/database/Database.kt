@@ -1,9 +1,9 @@
 package database
 
 import Node
-import IdNode
+import NodeId
 import Snapshot
-import IdUser
+import UserId
 import database.tables.TableNode
 import database.tables.TableSnapshot
 import database.tables.TableUser
@@ -32,7 +32,7 @@ object Database {
 		}
 	}
 
-	fun createNode(authorID: Long, content: String, parent: IdNode?): Node {
+	fun createNode(authorID: Long, content: String, parent: NodeId?): Node {
 		return transaction {
 			if (parent != null && !TableNode.exists { TableNode.id eq parent.value })
 				error("Parent does not exist")
@@ -47,8 +47,8 @@ object Database {
 				it[this.node] = nodeID
 			}
 			Node(
-				IdNode(nodeID),
-				IdUser(authorID),
+				NodeId(nodeID),
+				UserId(authorID),
 				snapshotPair.first,
 				parent
 			)
@@ -90,21 +90,21 @@ object Database {
 		return select { where() }.count() > 0
 	}
 
-	fun getNode(position: IdNode): Node? {
+	fun getNode(position: NodeId): Node? {
 		return transaction {
 			val query = TableNode.select { TableNode.id eq position.value }.firstOrNull()
 				?: return@transaction null
 			val node = Node(
-				IdNode(position.value),
-				IdUser(query[TableNode.author]),
+				NodeId(position.value),
+				UserId(query[TableNode.author]),
 				getSnapshot(query[TableNode.lastSnapshot])!!,
 				query[TableNode.parent].let {
-					if(it != null) IdNode(it) else null
+					if(it != null) NodeId(it) else null
 				} //TODO fix this.rumhampelei
 			)
 
 			val query2 = TableNode.select { TableNode.parent eq node.id.value }//TODO: only query IDs instead of whole nodes
-			val children = query2.map { IdNode(it[TableNode.id]) }
+			val children = query2.map { NodeId(it[TableNode.id]) }
 			node.children.addAll(children)
 			node
 		}
