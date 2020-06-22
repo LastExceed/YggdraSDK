@@ -37,6 +37,7 @@ subprojects {
 	dependencies {
 		implementation(kotlin("stdlib-jdk8"))
 		implementation("io.ktor", "ktor-network", "1.3.2-1.4-M2")
+		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.7-1.4-M2")
 	}
 }
 
@@ -72,5 +73,6 @@ project(":client") {
 	dependencies {
 		implementation(project(":common"))
 		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
+		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.7-1.4-M2")
 	}
 }
