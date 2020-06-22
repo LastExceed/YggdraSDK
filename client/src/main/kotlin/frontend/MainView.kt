@@ -1,18 +1,17 @@
 package frontend
 
-import frontend.components.ObservableNode
+import frontend.components.NodeCached
 import frontend.components.YggdraListCell
-import javafx.event.EventHandler
-import javafx.scene.control.ListView
+import javafx.beans.property.SimpleListProperty
 import javafx.scene.control.TextInputDialog
 import javafx.scene.input.KeyCode
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import tornadofx.*
 
-class MainView : View("YggdraChat") {
+class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 	private val username: String
-	private val chatPath = observableListOf(Tree.root)
-	private lateinit var commentsListView: ListView<ObservableNode>
+	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
+	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
 
 	init {
 		val dialog = TextInputDialog().apply {
@@ -22,19 +21,12 @@ class MainView : View("YggdraChat") {
 		val dialogResult = dialog.showAndWait()
 		username = dialogResult.get()
 
-		runAsync {
-			runBlocking {
-				Networker.connect(username)
-			}
+		launch(Dispatchers.IO) {
+			Networker.connect(username)
 		}
 	}
 
 	override val root = form {
-//		menubar {
-//			menu("options") {
-//				checkmenuitem("dark mode")
-//			}
-//		}
 		hbox {
 			listview(chatPath) {
 				setCellFactory {
@@ -44,7 +36,7 @@ class MainView : View("YggdraChat") {
 					goTo(it)
 				}
 			}
-			commentsListView = listview(chatPath.last().children) {
+			listview(comments) {
 				setCellFactory {
 					YggdraListCell()
 				}
@@ -54,16 +46,17 @@ class MainView : View("YggdraChat") {
 			}
 		}
 		textarea {
-			onKeyPressed = EventHandler {
+			setOnKeyPressed {
 				if (it.code != KeyCode.ENTER || !it.isControlDown) {
-					return@EventHandler
+					return@setOnKeyPressed
 				}
-				text = text.removeSuffix("\n")
-				if (text == "") {
-					return@EventHandler
+				text = text.trim()
+				if (text.isEmpty()) {
+					return@setOnKeyPressed
 				}
-				runAsync {
-					runBlocking {
+
+				launch {
+					withContext(Dispatchers.IO) {
 						Networker.createNode(chatPath.last(), text)
 					}
 					text = ""
@@ -72,23 +65,21 @@ class MainView : View("YggdraChat") {
 		}
 	}
 
-	private fun goTo(target: ObservableNode) {
+	private fun goTo(target: NodeCached) {
 		chatPath.clear()
 		target.children.clear()//these are outdated, server will provide current
 		//todo: use timestamp for differential update
 
-		fun addAfterParent(node: ObservableNode) {
+		fun addAfterParent(node: NodeCached) {
 			if (node.parent != null) addAfterParent(node.parent)
 			chatPath.add(node)
 		}
 		addAfterParent(target)
 
-		commentsListView.items = target.children
+		comments.set(target.children)
 
-		runAsync {
-			runBlocking {
-				Networker.goTo(target)
-			}
+		launch(Dispatchers.IO) {
+			Networker.goTo(target)
 		}
 	}
 }

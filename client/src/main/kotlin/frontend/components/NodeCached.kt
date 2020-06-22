@@ -3,11 +3,11 @@ package frontend.components
 import NodeId
 import tornadofx.observableListOf
 
-data class ObservableNode(
+data class NodeCached(
 	val id: NodeId,
 	val author: String,
 	val message: String,
-	val parent: ObservableNode?
+	val parent: NodeCached?
 ) {
-	val children = observableListOf<ObservableNode>()
+	val children = observableListOf<NodeCached>()
 }

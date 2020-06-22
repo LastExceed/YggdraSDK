@@ -3,16 +3,17 @@ package frontend.components
 import javafx.scene.control.*
 import tornadofx.*
 
-class YggdraListCell : ListCell<ObservableNode>() {
-	override fun updateItem(item: ObservableNode?, empty: Boolean) {
+class YggdraListCell : ListCell<NodeCached>() {
+	override fun updateItem(item: NodeCached?, empty: Boolean) {
 		super.updateItem(item, empty)
 
+		if (item == null != empty) error("api error")
+		
 		contextMenu = null
-		if (empty) {
+		if (item == null) {
 			graphic = null
 			return
 		}
-		item!!
 		graphic = vbox {
 			label(item.author)
 			label(item.message)
