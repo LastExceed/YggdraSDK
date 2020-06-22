@@ -1,8 +1,12 @@
 package packet
 
-import Node
+import Globals
 import NodeId
+import UserId
+import Node
+import Snapshot
 import io.ktor.utils.io.*
+import java.time.Instant
 
 data class PacketNodeReveal(
 	val node: Node
@@ -12,8 +16,8 @@ suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 	return PacketNodeReveal(
 		Node(
 			id = NodeId(this.readLong()),
-			author = this.readUTF8Line(32)!!,
-			message = this.readUTF8Line(999)!!,
+			author = UserId(this.readLong()),
+			snapshot = Snapshot(this.readUTF8Line(Globals.messageSizeLimit)!!, this.readInstant()),
 			parentId = NodeId(this.readLong())
 		)
 	)
@@ -23,7 +27,19 @@ suspend fun ByteWriteChannel.writePacketNodeReveal(packet: PacketNodeReveal) {
 	this.writeByte(packet.id.value)
 
 	this.writeLong(packet.node.id.value)
-	this.writeStringUtf8(packet.node.author + '\n')
-	this.writeStringUtf8(packet.node.message + '\n')
-	this.writeLong(packet.node.parentId.value)
+	this.writeLong(packet.node.author.value)
+	this.writeStringUtf8(packet.node.snapshot.content + '\n')
+	this.writeInstant(packet.node.snapshot.date)
+	this.writeLong(packet.node.parentId?.value ?: error("tried to write root node"))
+}
+
+suspend fun ByteWriteChannel.writeInstant(instant: Instant) {
+	this.writeLong(instant.epochSecond)
+	this.writeInt(instant.nano)
+}
+
+suspend fun ByteReadChannel.readInstant(): Instant {
+	val seconds = this.readLong()
+	val nanos = this.readInt()
+	return Instant.ofEpochSecond(seconds, nanos.toLong())
 }

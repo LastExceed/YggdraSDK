@@ -1,14 +1,17 @@
-import io.ktor.network.sockets.*
+import database.Database
+import io.ktor.network.sockets.Socket
+import io.ktor.network.sockets.openReadChannel
+import io.ktor.network.sockets.openWriteChannel
+import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.launch
 import packet.*
 
 class Server {
-	private val rootId = IdDispenser.next()
-	private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
+	//private val rootId = IdDispenser.next()
+	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
@@ -39,12 +42,13 @@ class Server {
 			error("first packet must be a namechange")
 		}
 		val nameChange = reader.readPacketNameChange()
+		Database.getOrCreateUser(nameChange.name)
 		val newSession = Session(
 			client,
 			reader,
 			writer,
 			nameChange.name,
-			tree[NodeId(0L)]!!
+			NodeId(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
 
@@ -62,29 +66,27 @@ class Server {
 
 	private suspend fun onPacketGoTo(source: Session) {
 		val jump = source.reader.readPacketGoTo()
-		source.position = tree[jump.position]!!
-		source.position.children.forEach {
-			source.writer.writePacketNodeReveal(PacketNodeReveal(it))
+
+		val node = Database.getNode(jump.position)
+			?: error("Node with ID ${jump.position} not found")
+
+		source.position = jump.position
+		node.children.forEach {
+			source.writer.writePacketNodeReveal(PacketNodeReveal(Database.getNode(it)!!))
 		}
 	}
 
 	private suspend fun onPacketNodeCreate(source: Session) {
 		val nodeCreation = source.reader.readPacketNodeCreate()
-
-		val newNode = Node(
-			id = IdDispenser.next(),
-			author = source.username,
-			message = nodeCreation.message,
-			parentId = nodeCreation.parentId
+		val newNode = Database.createNode(
+			Database.getUserID(source.username),
+			nodeCreation.message,
+			nodeCreation.parentId
 		)
-		tree[newNode.id] = newNode
-		val parent = tree[newNode.parentId]!!
-		parent.children.add(newNode)
 
 		val nodeRevelation = PacketNodeReveal(newNode)
-		for (session in sessions) {
-			if (session.position.id != newNode.parentId) continue
-			session.writer.writePacketNodeReveal(nodeRevelation)
+		sessions.filter { it.position == newNode.parentId }.forEach {
+			it.writer.writePacketNodeReveal(nodeRevelation)
 		}
 	}
 }
