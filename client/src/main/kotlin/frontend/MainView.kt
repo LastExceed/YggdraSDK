@@ -5,10 +5,10 @@ import frontend.components.YggdraListCell
 import javafx.beans.property.SimpleListProperty
 import javafx.scene.control.TextInputDialog
 import javafx.scene.input.KeyCode
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import tornadofx.*
 
-class MainView : View("YggdraChat") {
+class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 	private val username: String
 	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
 	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
@@ -21,19 +21,12 @@ class MainView : View("YggdraChat") {
 		val dialogResult = dialog.showAndWait()
 		username = dialogResult.get()
 
-		runAsync {
-			runBlocking {
-				Networker.connect(username)
-			}
+		launch(Dispatchers.IO) {
+			Networker.connect(username)
 		}
 	}
 
 	override val root = form {
-//		menubar {
-//			menu("options") {
-//				checkmenuitem("dark mode")
-//			}
-//		}
 		hbox {
 			listview(chatPath) {
 				setCellFactory {
@@ -61,8 +54,9 @@ class MainView : View("YggdraChat") {
 				if (text == "") {
 					return@EventHandler
 				}
-				runAsync {
-					runBlocking {
+
+				launch {
+					withContext(Dispatchers.IO) {
 						Networker.createNode(chatPath.last(), text)
 					}
 					text = ""
@@ -84,10 +78,8 @@ class MainView : View("YggdraChat") {
 
 		comments.set(target.children)
 
-		runAsync {
-			runBlocking {
-				Networker.goTo(target)
-			}
+		launch(Dispatchers.IO) {
+			Networker.goTo(target)
 		}
 	}
 }
