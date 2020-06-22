@@ -25,30 +25,30 @@ object Database {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
-				val idUserRoot = getOrCreateUser("rootuser")
-				createNode(idUserRoot, "root of all evil", null)
+				val rootUserId = getOrCreateUser("rootuser")
+				createNode(rootUserId, "root of all evil", null)
 			}
 
 		}
 	}
 
-	fun createNode(authorID: Long, content: String, parent: NodeId?): Node {
+	fun createNode(authorId: Long, content: String, parent: NodeId?): Node {
 		return transaction {
 			if (parent != null && !TableNode.exists { TableNode.id eq parent.value })
 				error("Parent does not exist")
 
 			val snapshotPair = createSnapshot(content, parent = null)
-			val nodeID = TableNode.insertIgnore {
-				it[this.author] = authorID
+			val nodeId = TableNode.insertIgnore {
+				it[this.author] = authorId
 				it[this.parent] = parent?.value
 				it[this.lastSnapshot] = snapshotPair.second
 			} get TableNode.id
 			TableSnapshot.update(where = { TableSnapshot.id eq snapshotPair.second }) {
-				it[this.node] = nodeID
+				it[this.node] = nodeId
 			}
 			Node(
-				NodeId(nodeID),
-				UserId(authorID),
+				NodeId(nodeId),
+				UserId(authorId),
 				snapshotPair.first,
 				parent
 			)
