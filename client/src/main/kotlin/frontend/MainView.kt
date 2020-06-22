@@ -2,8 +2,7 @@ package frontend
 
 import frontend.components.NodeCached
 import frontend.components.YggdraListCell
-import javafx.event.EventHandler
-import javafx.scene.control.ListView
+import javafx.beans.property.SimpleListProperty
 import javafx.scene.control.TextInputDialog
 import javafx.scene.input.KeyCode
 import kotlinx.coroutines.runBlocking
@@ -11,8 +10,8 @@ import tornadofx.*
 
 class MainView : View("YggdraChat") {
 	private val username: String
-	private val chatPath = observableListOf(Tree.root)
-	private lateinit var commentsListView: ListView<ObservableNode>
+	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
+	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
 
 	init {
 		val dialog = TextInputDialog().apply {
@@ -44,7 +43,7 @@ class MainView : View("YggdraChat") {
 					goTo(it)
 				}
 			}
-			commentsListView = listview(chatPath.last().children) {
+			listview(comments) {
 				setCellFactory {
 					YggdraListCell()
 				}
@@ -54,9 +53,9 @@ class MainView : View("YggdraChat") {
 			}
 		}
 		textarea {
-			onKeyPressed = EventHandler {
+			setOnKeyPressed {
 				if (it.code != KeyCode.ENTER || !it.isControlDown) {
-					return@EventHandler
+					return@setOnKeyPressed
 				}
 				text = text.removeSuffix("\n")
 				if (text == "") {
@@ -83,7 +82,7 @@ class MainView : View("YggdraChat") {
 		}
 		addAfterParent(target)
 
-		commentsListView.items = target.children
+		comments.set(target.children)
 
 		runAsync {
 			runBlocking {
