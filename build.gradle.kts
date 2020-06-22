@@ -23,6 +23,8 @@ subprojects {
 
 	repositories {
 		mavenCentral()
+		jcenter()
+		maven("https://dl.bintray.com/kotlin/kotlin-eap")
 		setOf(
 			"kotlin-eap",
 			"ktor",
