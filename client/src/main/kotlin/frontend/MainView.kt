@@ -50,9 +50,9 @@ class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 				if (it.code != KeyCode.ENTER || !it.isControlDown) {
 					return@setOnKeyPressed
 				}
-				text = text.removeSuffix("\n")
-				if (text == "") {
-					return@EventHandler
+				text = text.trim()
+				if (text.isEmpty()) {
+					return@setOnKeyPressed
 				}
 
 				launch {
