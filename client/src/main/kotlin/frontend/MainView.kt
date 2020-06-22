@@ -1,6 +1,6 @@
 package frontend
 
-import frontend.components.ObservableNode
+import frontend.components.NodeCached
 import frontend.components.YggdraListCell
 import javafx.event.EventHandler
 import javafx.scene.control.ListView
@@ -72,12 +72,12 @@ class MainView : View("YggdraChat") {
 		}
 	}
 
-	private fun goTo(target: ObservableNode) {
+	private fun goTo(target: NodeCached) {
 		chatPath.clear()
 		target.children.clear()//these are outdated, server will provide current
 		//todo: use timestamp for differential update
 
-		fun addAfterParent(node: ObservableNode) {
+		fun addAfterParent(node: NodeCached) {
 			if (node.parent != null) addAfterParent(node.parent)
 			chatPath.add(node)
 		}

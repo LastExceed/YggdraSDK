@@ -3,8 +3,8 @@ package frontend.components
 import javafx.scene.control.*
 import tornadofx.*
 
-class YggdraListCell : ListCell<ObservableNode>() {
-	override fun updateItem(item: ObservableNode?, empty: Boolean) {
+class YggdraListCell : ListCell<NodeCached>() {
+	override fun updateItem(item: NodeCached?, empty: Boolean) {
 		super.updateItem(item, empty)
 
 		contextMenu = null
