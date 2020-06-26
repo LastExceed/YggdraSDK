@@ -1,6 +1,8 @@
 import frontend.components.NodeCached
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import packet.*
 import tornadofx.runLater
 
@@ -46,7 +48,7 @@ object Networker {
 
 		NodeCache.allNodes[newNodeCached.id] = newNodeCached
 
-		runLater {
+		withContext(Dispatchers.Main) {
 			newNodeCached.parent!!.children.add(newNodeCached)
 		}
 	}
