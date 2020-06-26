@@ -1,4 +1,4 @@
-import frontend.components.ObservableNode
+import frontend.components.NodeCached
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import packet.*
@@ -37,21 +37,21 @@ object Networker {
 		if (newNode.id.value == 1L) { //TODO: dont hardcode root ID
 			error("root revealed")
 		}
-		val newObservableNode = ObservableNode(
+		val newNodeCached = NodeCached(
 			id = newNode.id,
 			author = newNode.author.value.toString(),
 			message = newNode.snapshot.content,
-			parent = Tree.allNodes[newNode.parentId]!!
+			parent = NodeCache.allNodes[newNode.parentId]!!
 		)
 
-		Tree.allNodes[newObservableNode.id] = newObservableNode
+		NodeCache.allNodes[newNodeCached.id] = newNodeCached
 
 		runLater {
-			newObservableNode.parent!!.children.add(newObservableNode)
+			newNodeCached.parent!!.children.add(newNodeCached)
 		}
 	}
 
-	suspend fun createNode(parent: ObservableNode, text: String) {
+	suspend fun createNode(parent: NodeCached, text: String) {
 		writer.writePacketNodeCreate(
 			PacketNodeCreate(
 				parent.id,
@@ -60,7 +60,7 @@ object Networker {
 		)
 	}
 
-	suspend fun goTo(target: ObservableNode) {
+	suspend fun goTo(target: NodeCached) {
 		writer.writePacketGoTo(PacketGoTo(target.id))
 	}
 }
