@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "1.4-M2"
+	kotlin("jvm") version "1.3.72"
 	id("org.openjfx.javafxplugin") version "0.0.8"
 }
 
@@ -24,20 +24,12 @@ subprojects {
 	repositories {
 		mavenCentral()
 		jcenter()
-		maven("https://dl.bintray.com/kotlin/kotlin-eap")
-		setOf(
-			"kotlin-eap",
-			"ktor",
-			"kotlinx"
-		).forEach {
-			maven("https://dl.bintray.com/kotlin/$it")
-		}
 	}
 
 	dependencies {
 		implementation(kotlin("stdlib-jdk8"))
-		implementation("io.ktor", "ktor-network", "1.3.2-1.4-M2")
-		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.7-1.4-M2")
+		implementation("io.ktor", "ktor-network", "1.3.1")
+		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
 	}
 }
 
@@ -73,6 +65,6 @@ project(":client") {
 	dependencies {
 		implementation(project(":common"))
 		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
-		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.7-1.4-M2")
+		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.8")
 	}
 }
