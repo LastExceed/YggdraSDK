@@ -19,7 +19,7 @@ import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
 //TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
-	//private val db: ExposedDatabase = ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC") //TODO: change to relative path
+	//jdbc:sqlite:/data/database.db TODO: change to relative path
 
 	init {
 		db.useNestedTransactions = true
@@ -40,7 +40,7 @@ class Database(private val db: ExposedDatabase) {
 			if (parent != null && !TableNode.exists { TableNode.id eq parent.value })
 				error("Parent does not exist")
 
-			val snapshotPair = createSnapshot(content, parent = null)
+			val snapshotPair = createAndReturnSnapshot(content, parent = null)
 			val nodeId = TableNode.insert {
 				it[this.author] = authorId
 				it[this.parent] = parent?.value
@@ -75,18 +75,21 @@ class Database(private val db: ExposedDatabase) {
 		}
 	}
 
-	fun addSnapshot(content: String, parent: Long) = createSnapshot(content, parent)
+	fun addSnapshot(content: String, parent: Long) = createAndReturnSnapshot(content, parent)
 
-	private fun createSnapshot(content: String, parent: Long?): Pair<Snapshot, Long> {
+	private fun createAndReturnSnapshot(content: String, parent: Long?): Pair<Snapshot, Long> {
 		val instant = Instant.now()
-		val snapshotId = transaction(db) {
+		return Snapshot(content, instant) to createSnapshot(content, parent, instant)
+	}
+
+	private fun createSnapshot(content: String, parent: Long?, instant: Instant = Instant.now()): Long {
+		return transaction(db) {
 			TableSnapshot.insert {
 				it[this.content] = content
 				it[this.node] = parent
 				it[this.timestamp] = instant
 			} get TableSnapshot.id
 		}
-		return Snapshot(content, instant) to snapshotId
 	}
 
 	private fun FieldSet.exists(where: SqlExpressionBuilder.() -> Op<Boolean>): Boolean {
@@ -119,6 +122,18 @@ class Database(private val db: ExposedDatabase) {
 				TableNode.deleteWhere { TableNode.id eq position.value }
 			} catch (e: SQLException) {
 				throw SQLException("Error while deleting Node with ID ${position.value} error message: ${e.message}" )
+			}
+		}
+	}
+
+	fun updateNode(newContent: String, position: NodeId) {
+		transaction(db) {
+			if(!TableNode.exists{ TableNode.id eq position.value } ) {
+				throw Exception("Node with ID ${position.value} does not exist")
+			}
+			val snapshotID = createSnapshot(newContent, position.value)
+			TableNode.update ({ TableNode.id eq position.value }) {
+				it[TableNode.lastSnapshot] = snapshotID
 			}
 		}
 	}
