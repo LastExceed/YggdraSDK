@@ -6,10 +6,10 @@ import database.Database
 import org.junit.jupiter.api.DynamicTest
 import kotlin.test.*
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Test
 import random.*
 import kotlin.random.Random
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
-
 
 class DatabaseTests {
 	private val database: Database
@@ -40,6 +40,18 @@ class DatabaseTests {
 			assertEquals(node.author.value, nodeData.authorID)
 			assertEquals(node.latestSnapshot.content, nodeData.content)
 			assertEquals(node.parentId, nodeData.parentID)
+		}
+	}
+
+	@TestFactory
+	fun createAndDeleteNode() = (1..20).toList().map {
+		val nodeData = NodeData()
+
+		DynamicTest.dynamicTest("ID: ${nodeData.authorID} content: ${nodeData.content}") {
+			val nodeID = database.createNode(nodeData.authorID, nodeData.content, nodeData.parentID).id
+			assertNotNull(database.getNode(nodeID))
+			database.deleteNode(nodeID)
+			assertNull(database.getNode(nodeID))
 		}
 	}
 }
