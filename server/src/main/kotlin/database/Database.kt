@@ -10,9 +10,12 @@ import database.tables.TableUser
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.lang.Exception
 import java.sql.Connection
+import java.sql.SQLException
 import java.time.Instant
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
+
 
 //TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
@@ -107,6 +110,16 @@ class Database(private val db: ExposedDatabase) {
 			val children = query2.map { NodeId(it[TableNode.id]) }
 			node.children.addAll(children)
 			node
+		}
+	}
+
+	fun deleteNode(position: NodeId) {
+		transaction(db) {
+			try {
+				TableNode.deleteWhere { TableNode.id eq position.value }
+			} catch (e: SQLException) {
+				throw SQLException("Error while deleting Node with ID ${position.value} error message: ${e.message}" )
+			}
 		}
 	}
 
