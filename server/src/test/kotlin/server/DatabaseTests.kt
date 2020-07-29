@@ -54,4 +54,20 @@ class DatabaseTests {
 			assertNull(database.getNode(nodeID))
 		}
 	}
+
+	@TestFactory
+	fun createAndUpdateNode() = (1..20).toList().map {
+		val nodeData = NodeData()
+		val updateData = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,2000))
+
+		DynamicTest.dynamicTest("ID: ${nodeData.authorID} content: ${nodeData.content}") {
+			val nodeID = database.createNode(nodeData.authorID, nodeData.content, nodeData.parentID).id
+			database.updateNode(updateData, nodeID)
+			val node = database.getNode(nodeID)
+			assertNotNull(node)
+			assertEquals(node.author.value, nodeData.authorID)
+			assertEquals(node.latestSnapshot.content, updateData)
+			assertEquals(node.parentId, nodeData.parentID)
+		}
+	}
 }
