@@ -10,28 +10,29 @@ import writeString
 import java.time.Instant
 
 data class PacketNodeReveal(
-	val node: Node
+	val nodeId: NodeId,
+	val own: Boolean,
+	val snapshot: Snapshot,
+	val parentId: NodeId
 ) : Packet(PacketId.NODE_REVEAL)
 
 suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 	return PacketNodeReveal(
-		Node(
-			id = NodeId(this.readLong()),
-			author = UserId(this.readLong()),
-			snapshot = Snapshot(this.readString(), this.readInstant()),
-			parentId = NodeId(this.readLong())
-		)
+		nodeId = NodeId(this.readLong()),
+		own = this.readBoolean(),
+		snapshot = Snapshot(this.readString(), this.readInstant()),
+		parentId = NodeId(this.readLong())
 	)
 }
 
 suspend fun ByteWriteChannel.writePacketNodeReveal(packet: PacketNodeReveal) {
 	this.writeByte(packet.id.value)
 
-	this.writeLong(packet.node.id.value)
-	this.writeLong(packet.node.author.value)
-	this.writeString(packet.node.snapshot.content)
-	this.writeInstant(packet.node.snapshot.date)
-	this.writeLong(packet.node.parentId?.value ?: error("tried to write root node"))
+	this.writeLong(packet.nodeId.value)
+	this.writeBoolean(packet.own)
+	this.writeString(packet.snapshot.content)
+	this.writeInstant(packet.snapshot.date)
+	this.writeLong(packet.parentId.value)
 }
 
 suspend fun ByteWriteChannel.writeInstant(instant: Instant) {

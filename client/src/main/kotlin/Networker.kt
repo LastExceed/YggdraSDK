@@ -35,15 +35,14 @@ object Networker {
 
 	private suspend fun onPacketNodeReveal() {
 		val nodeRevelation = reader.readPacketNodeReveal()
-		val newNode = nodeRevelation.node
-		if (newNode.id.value == 1L) { //TODO: dont hardcode root ID
+		if (nodeRevelation.nodeId.value == 1L) { //TODO: dont hardcode root ID
 			error("root revealed")
 		}
 		val newNodeCached = NodeCached(
-			id = newNode.id,
-			author = newNode.author.value.toString(),
-			message = newNode.snapshot.content,
-			parent = NodeCache.allNodes[newNode.parentId]!!
+			id = nodeRevelation.nodeId,
+			own = nodeRevelation.own,
+			message = nodeRevelation.snapshot.content,
+			parent = NodeCache.allNodes[nodeRevelation.parentId]!!
 		)
 
 		NodeCache.allNodes[newNodeCached.id] = newNodeCached
