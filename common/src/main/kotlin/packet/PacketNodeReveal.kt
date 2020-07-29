@@ -17,7 +17,7 @@ suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 		Node(
 			id = NodeId(this.readLong()),
 			author = UserId(this.readLong()),
-			snapshot = Snapshot(this.readUTF8Line(Globals.messageSizeLimit)!!, this.readInstant()),
+			latestSnapshot = Snapshot(this.readUTF8Line(Globals.messageSizeLimit)!!, this.readInstant()),
 			parentId = NodeId(this.readLong())
 		)
 	)
@@ -28,8 +28,8 @@ suspend fun ByteWriteChannel.writePacketNodeReveal(packet: PacketNodeReveal) {
 
 	this.writeLong(packet.node.id.value)
 	this.writeLong(packet.node.author.value)
-	this.writeStringUtf8(packet.node.snapshot.content + '\n')
-	this.writeInstant(packet.node.snapshot.date)
+	this.writeStringUtf8(packet.node.latestSnapshot.content + '\n')
+	this.writeInstant(packet.node.latestSnapshot.date)
 	this.writeLong(packet.node.parentId?.value ?: error("tried to write root node"))
 }
 

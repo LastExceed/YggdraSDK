@@ -3,7 +3,7 @@ import java.time.Instant
 data class Node(
 	val id: NodeId,
 	val author: UserId,
-	val snapshot: Snapshot,
+	val latestSnapshot: Snapshot,
 	val parentId: NodeId?
 ) {
 	val children = mutableListOf<NodeId>()

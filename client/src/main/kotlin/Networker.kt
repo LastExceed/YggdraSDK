@@ -42,7 +42,7 @@ object Networker {
 		val newNodeCached = NodeCached(
 			id = newNode.id,
 			author = newNode.author.value.toString(),
-			message = newNode.snapshot.content,
+			message = newNode.latestSnapshot.content,
 			parent = NodeCache.allNodes[newNode.parentId]!!
 		)
 
