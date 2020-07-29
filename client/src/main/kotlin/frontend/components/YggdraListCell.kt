@@ -14,8 +14,10 @@ class YggdraListCell : ListCell<NodeCached>() {
 			graphic = null
 			return
 		}
-		graphic = vbox {
-			label(item.message)
+		graphic = label(item.message) {
+			if (item.own) {
+				style(append = true) { backgroundColor += c("#00FF00", .5) }
+			}
 		}
 		contextMenu = contextmenu {
 			item("edit") {
