@@ -1,15 +1,14 @@
 import database.Database
-import io.ktor.network.sockets.Socket
-import io.ktor.network.sockets.openReadChannel
-import io.ktor.network.sockets.openWriteChannel
+import io.ktor.network.sockets.*
 import io.ktor.utils.io.writeBoolean
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import packet.*
+import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
 class Server {
+	private val database = Database(
+		ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC")
+	)
 	//private val rootId = IdDispenser.next()
 	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
@@ -42,7 +41,7 @@ class Server {
 			error("first packet must be a namechange")
 		}
 		val nameChange = reader.readPacketNameChange()
-		Database.getOrCreateUser(nameChange.name)
+		database.getOrCreateUser(nameChange.name)
 		val newSession = Session(
 			client,
 			reader,
@@ -67,19 +66,19 @@ class Server {
 	private suspend fun onPacketGoTo(source: Session) {
 		val jump = source.reader.readPacketGoTo()
 
-		val node = Database.getNode(jump.position)
-			?: error("Node with ID ${jump.position} not found")
+		val node = database.getNode(jump.position)
+			?: error("Node with ID ${jump.position.value} not found")
 
 		source.position = jump.position
 		node.children.forEach {
-			source.writer.writePacketNodeReveal(PacketNodeReveal(Database.getNode(it)!!))
+			source.writer.writePacketNodeReveal(PacketNodeReveal(database.getNode(it)!!))
 		}
 	}
 
 	private suspend fun onPacketNodeCreate(source: Session) {
 		val nodeCreation = source.reader.readPacketNodeCreate()
-		val newNode = Database.createNode(
-			Database.getUserID(source.username),
+		val newNode = database.createNode(
+			database.getUserID(source.username),
 			nodeCreation.message,
 			nodeCreation.parentId
 		)
