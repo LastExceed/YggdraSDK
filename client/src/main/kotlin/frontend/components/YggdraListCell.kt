@@ -15,7 +15,6 @@ class YggdraListCell : ListCell<NodeCached>() {
 			return
 		}
 		graphic = vbox {
-			label(item.author)
 			label(item.message)
 		}
 		contextMenu = contextmenu {
