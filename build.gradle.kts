@@ -30,6 +30,7 @@ subprojects {
 		implementation(kotlin("stdlib-jdk8"))
 		implementation("io.ktor", "ktor-network", "1.3.1")
 		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
+		testImplementation(kotlin("test-junit5"))
 	}
 }
 
@@ -41,9 +42,10 @@ project(":server") {
 			"dao",
 			"jdbc",
 			"java-time"
-		).forEach { implementation("org.jetbrains.exposed", "exposed-$it", "0.24.1") }
+		).forEach { implementation("org.jetbrains.exposed", "exposed-$it", "0.25.1") }
 		implementation("org.xerial","sqlite-jdbc","3.30.1")
 		implementation("org.slf4j","slf4j-simple","1.7.25")
+		testImplementation("com.zaxxer","HikariCP","3.4.2")
 	}
 }
 
