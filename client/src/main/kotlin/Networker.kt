@@ -4,6 +4,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import packet.*
+import packet.Packet.Companion.writePacket
 import tornadofx.runLater
 
 object Networker {
@@ -21,8 +22,8 @@ object Networker {
 		if (!response) {
 			error("outdated")
 		}
-		writer.writePacketNameChange(PacketNameChange(username))
-		writer.writePacketGoTo(PacketGoTo(NodeId(1L)))//TODO: dont hardcode root ID
+		writer.writePacket((PacketNameChange(username)))
+		writer.writePacket(PacketGoTo(NodeId(1L)))//TODO: dont hardcode root ID
 		while (true) {
 			val packetID = PacketId(reader.readByte())
 			when (packetID) { //use a map instead
@@ -54,7 +55,7 @@ object Networker {
 	}
 
 	suspend fun createNode(parent: NodeCached, text: String) {
-		writer.writePacketNodeCreate(
+		writer.writePacket(
 			PacketNodeCreate(
 				parent.id,
 				text
@@ -63,6 +64,6 @@ object Networker {
 	}
 
 	suspend fun goTo(target: NodeCached) {
-		writer.writePacketGoTo(PacketGoTo(target.id))
+		writer.writePacket(PacketGoTo(target.id))
 	}
 }
