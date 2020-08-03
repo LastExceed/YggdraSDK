@@ -5,6 +5,7 @@ import packet.*
 import java.net.InetSocketAddress
 import kotlin.random.Random
 import kotlin.test.*
+import packet.Packet.Companion.writePacket
 
 class PacketTests {
 	data class PacketGoToData(
@@ -28,7 +29,7 @@ class PacketTests {
 			DynamicTest.dynamicTest(random.position.value.toString()) {
 				runBlocking {
 					val packet = PacketGoTo(random.position)
-					writer.writePacketGoTo(packet)
+					writer.writePacket(packet)
 					assertEquals(reader.readByte(), PacketId.GOTO.value)
 					val readPacket = reader.readPacketGoTo()
 
