@@ -1,7 +1,9 @@
 package packet
 
 import NodeId
+import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import java.net.InetSocketAddress
 
 data class PacketGoTo(
 	val position: NodeId
@@ -9,18 +11,8 @@ data class PacketGoTo(
 	override suspend fun writePacketContent(writer: ByteWriteChannel) {
 		writer.writeLong(position.value)
 	}
-
-	override suspend fun readPacketContent(reader: ByteReadChannel) {
-		TODO("Not yet implemented")
-	}
-
 }
 
 suspend fun ByteReadChannel.readPacketGoTo(): PacketGoTo {
 	return PacketGoTo(NodeId(this.readLong()))
 }
-
-//suspend fun ByteWriteChannel.writePacketGoTo(packet: PacketGoTo) {
-//	this.writeByte(packet.id.value)
-//	this.writeLong(packet.position.value)
-//}

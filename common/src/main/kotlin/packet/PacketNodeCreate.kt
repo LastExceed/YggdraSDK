@@ -14,10 +14,6 @@ data class PacketNodeCreate(
 		writer.writeLong(parentId.value)
 		writer.writeString(message)
 	}
-
-	override suspend fun readPacketContent(reader: ByteReadChannel) {
-		TODO("Not yet implemented")
-	}
 }
 
 suspend fun ByteReadChannel.readPacketNodeCreate(): PacketNodeCreate {
@@ -26,9 +22,3 @@ suspend fun ByteReadChannel.readPacketNodeCreate(): PacketNodeCreate {
 		this.readString()
 	)
 }
-
-//suspend fun ByteWriteChannel.writePacketNodeCreate(packet: PacketNodeCreate) {
-//	this.writeByte(packet.id.value)
-//	this.writeLong(packet.parentId.value)
-//	this.writeString(packet.message)
-//}

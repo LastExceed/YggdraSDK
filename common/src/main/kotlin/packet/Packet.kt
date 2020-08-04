@@ -12,17 +12,17 @@ abstract class Packet(val id: PacketId) {
 			packet.writePacketContent(this)
 		}
 
+		suspend fun ByteReadChannel.readPacket(): Packet {
+			val packetId = PacketId(this.readByte())
+			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
+			return packetHandler(this)
+		}
+
 		private val map = mapOf(
 			PacketId.NODE_CREATE to ByteReadChannel::readPacketNodeCreate,
 			PacketId.GOTO to ByteReadChannel::readPacketGoTo,
 			PacketId.NAMECHANGE to ByteReadChannel::readPacketNameChange,
 			PacketId.NODE_REVEAL to ByteReadChannel::readPacketNodeReveal
 		)
-
-		suspend fun ByteReadChannel.readPacket(): Packet {
-			val packetId = PacketId(this.readByte())
-			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
-			return packetHandler(this)
-		}
 	}
 }

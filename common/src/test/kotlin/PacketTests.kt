@@ -2,6 +2,7 @@ import io.ktor.network.sockets.*
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import packet.*
+import packet.Packet.Companion.readPacket
 import java.net.InetSocketAddress
 import kotlin.random.Random
 import kotlin.test.*
@@ -31,7 +32,7 @@ class PacketTests {
 					val packet = PacketGoTo(random.position)
 					writer.writePacket(packet)
 					assertEquals(reader.readByte(), PacketId.GOTO.value)
-					val readPacket = reader.readPacketGoTo()
+					val readPacket = reader.readPacket()
 
 					assertNotNull(readPacket)
 					assertNotNull(packet)
