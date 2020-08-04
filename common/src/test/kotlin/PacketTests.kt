@@ -1,4 +1,5 @@
 import io.ktor.network.sockets.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import packet.*
@@ -15,29 +16,30 @@ class PacketTests {
 
 	//TODO this is kinda dirty
 
+	private fun writeAndReadPacket(packet: Packet, writer: ByteWriteChannel, reader: ByteReadChannel) = runBlocking {
+		writer.writePacket(packet)
+		val readPacket = reader.readPacket()
+		assertNotNull(readPacket)
+		assertNotNull(packet)
+		assertEquals(packet, readPacket)
+	}
 
-	private val goToPort = 1
+
+	private val goToTestPort = 1
 	@TestFactory
 	fun writeAndReadPacketGoTo() = runBlocking {
-		val address = InetSocketAddress("127.0.0.1", goToPort)
+		val address = InetSocketAddress("127.0.0.1", goToTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
 			.openWriteChannel(true)
 		val reader = listener.accept().openReadChannel()
 
 		(1..20).map {
-			val random = PacketGoToData()
-			DynamicTest.dynamicTest(random.position.value.toString()) {
-				runBlocking {
-					val packet = PacketGoTo(random.position)
-					writer.writePacket(packet)
-					assertEquals(reader.readByte(), PacketId.GOTO.value)
-					val readPacket = reader.readPacket()
+			val random = PacketTests.PacketGoToData()
+			val packet = PacketGoTo(random.position)
 
-					assertNotNull(readPacket)
-					assertNotNull(packet)
-					assertEquals(packet, readPacket)
-				}
+			DynamicTest.dynamicTest(random.position.value.toString()) {
+				writeAndReadPacket(packet, writer, reader)
 			}
 		}
 	}
