@@ -4,11 +4,14 @@ import kotlinx.coroutines.*
 import org.junit.jupiter.api.*
 import packet.*
 import packet.Packet.Companion.readPacket
-import java.net.InetSocketAddress
-import kotlin.random.Random
-import kotlin.test.*
 import packet.Packet.Companion.writePacket
+import java.net.*
+import kotlin.random.*
+import kotlin.test.*
 import random.*
+import java.time.*
+
+const val testRepeats: Int = 100
 
 class PacketTests {
 	private fun writeAndReadPacket(packet: Packet, writer: ByteWriteChannel, reader: ByteReadChannel) = runBlocking {
@@ -32,7 +35,7 @@ class PacketTests {
 			.openWriteChannel(true)
 		val reader = listener.accept().openReadChannel()
 
-		(1..20).map {
+		(1..testRepeats).map {
 			val random = PacketGoToData()
 			val packet = PacketGoTo(random.position)
 
@@ -43,7 +46,7 @@ class PacketTests {
 	}
 
 	data class PacketNameChangeData(
-		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
+		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.userNameLimit))
 	)
 
 	private val nameChangeTestPort = 2
@@ -55,7 +58,7 @@ class PacketTests {
 			.openWriteChannel(true)
 		val reader = listener.accept().openReadChannel()
 
-		(1..20).map {
+		(1..testRepeats).map {
 			val random = PacketNameChangeData()
 			val packet = PacketNameChange(random.name)
 
@@ -73,17 +76,51 @@ class PacketTests {
 	private val nodeCreateTestPort = 3
 	@TestFactory
 	fun writeAndReadPacketNodeCreate() = runBlocking {
-		val address = InetSocketAddress("127.0.0.1", nameChangeTestPort)
+		val address = InetSocketAddress("127.0.0.1", nodeCreateTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
 			.openWriteChannel(true)
 		val reader = listener.accept().openReadChannel()
 
-		(1..20).map {
+		(1..testRepeats).map {
 			val random = PacketNodeCreateData()
 			val packet = PacketNodeCreate(random.parentId, random.message)
 
-			DynamicTest.dynamicTest("parentId: ${random.parentId} message: ${random.message}") {
+			DynamicTest.dynamicTest("parentId: ${random.parentId.value} message: ${random.message}") {
+				writeAndReadPacket(packet, writer, reader)
+			}
+		}
+	}
+
+	data class NodeData(
+		val node: Node = Node(
+			NodeId(Random.nextLong()),
+			UserId(Random.nextLong()),
+			Snapshot(
+				(CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit)),
+				Instant.now() //TODO create random Instants
+			),
+			NodeId(Random.nextLong())
+		)
+	)
+
+	private val nodeRevealTestPort = 12345
+	@TestFactory
+	fun writeAndReadPacketNodeReveal() = runBlocking {
+		val address = InetSocketAddress("127.0.0.1", nodeRevealTestPort)
+		val listener = Globals.tcpSocketBuilder.bind(address)
+		val writer = Globals.tcpSocketBuilder.connect(address)
+			.openWriteChannel(true)
+		val reader = listener.accept().openReadChannel()
+
+		(1..testRepeats).map {
+			val random = NodeData().node
+			val packet = PacketNodeReveal(random)
+
+			DynamicTest.dynamicTest(
+				"Id: ${random.id.value} author: ${random.author.value} parentId: ${random.parentId?.value}" +
+				" snapshotData: ${random.latestSnapshot.date} snapshotContent: ${random.latestSnapshot.content}"
+			) {
 				writeAndReadPacket(packet, writer, reader)
 			}
 		}
