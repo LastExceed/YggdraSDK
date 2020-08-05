@@ -4,6 +4,8 @@ import io.ktor.utils.io.writeBoolean
 import kotlinx.coroutines.*
 import packet.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
+import packet.Packet.Companion.writePacket
+import kotlin.random.Random
 
 class Server {
 	private val database = Database(
@@ -71,7 +73,7 @@ class Server {
 
 		source.position = jump.position
 		node.children.forEach {
-			source.writer.writePacketNodeReveal(PacketNodeReveal(database.getNode(it)!!))
+			source.writer.writePacket(PacketNodeReveal(database.getNode(it)!!))
 		}
 	}
 
@@ -85,7 +87,7 @@ class Server {
 
 		val nodeRevelation = PacketNodeReveal(newNode)
 		sessions.filter { it.position == newNode.parentId }.forEach {
-			it.writer.writePacketNodeReveal(nodeRevelation)
+			it.writer.writePacket(nodeRevelation)
 		}
 	}
 }
