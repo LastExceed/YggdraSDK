@@ -43,7 +43,7 @@ class PacketTests {
 	}
 
 	data class PacketNameChangeData(
-		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,2000))
+		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
 	)
 
 	private val nameChangeTestPort = 2
@@ -65,4 +65,27 @@ class PacketTests {
 		}
 	}
 
+	data class PacketNodeCreateData(
+		val parentId: NodeId = NodeId(Random.nextLong()),
+		val message: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
+	)
+
+	private val nodeCreateTestPort = 3
+	@TestFactory
+	fun writeAndReadPacketNodeCreate() = runBlocking {
+		val address = InetSocketAddress("127.0.0.1", nameChangeTestPort)
+		val listener = Globals.tcpSocketBuilder.bind(address)
+		val writer = Globals.tcpSocketBuilder.connect(address)
+			.openWriteChannel(true)
+		val reader = listener.accept().openReadChannel()
+
+		(1..20).map {
+			val random = PacketNodeCreateData()
+			val packet = PacketNodeCreate(random.parentId, random.message)
+
+			DynamicTest.dynamicTest("parentId: ${random.parentId} message: ${random.message}") {
+				writeAndReadPacket(packet, writer, reader)
+			}
+		}
+	}
 }

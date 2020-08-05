@@ -10,7 +10,6 @@ data class PacketNodeCreate(
 	val message: String
 ) : Packet(PacketId.NODE_CREATE) {
 	override suspend fun writePacketContent(writer: ByteWriteChannel) {
-		writer.writeByte(id.value)
 		writer.writeLong(parentId.value)
 		writer.writeString(message)
 	}
