@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import packet.*
 import packet.Packet.Companion.writePacket
-import tornadofx.runLater
 
 object Networker {
 	private lateinit var socket: Socket
@@ -55,15 +54,12 @@ object Networker {
 	}
 
 	suspend fun createNode(parent: NodeCached, text: String) {
-		writer.writePacket(
-			PacketNodeCreate(
-				parent.id,
-				text
-			)
-		)
+		val packetNodeCreate = PacketNodeCreate(parent.id, text)
+		writer.writePacket(packetNodeCreate)
 	}
 
 	suspend fun goTo(target: NodeCached) {
-		writer.writePacket(PacketGoTo(target.id))
+		val packetGoTo = PacketGoTo(target.id)
+		writer.writePacket(packetGoTo)
 	}
 }

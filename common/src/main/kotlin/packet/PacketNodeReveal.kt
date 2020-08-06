@@ -26,7 +26,7 @@ suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 		Node(
 			id = NodeId(this.readLong()),
 			author = UserId(this.readLong()),
-      latestSnapshot = Snapshot(this.readString(), this.readInstant()),
+			latestSnapshot = Snapshot(this.readString(), this.readInstant()),
 			parentId = NodeId(this.readLong())
 		)
 	)

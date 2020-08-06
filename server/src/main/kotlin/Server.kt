@@ -59,8 +59,8 @@ class Server {
 		)
 
 		while (true) {
-			val packetID = PacketId(newSession.reader.readByte())
-			val packetHandler = map[packetID] ?: error("unknown packet ID: $packetID")
+			val packetId = PacketId(newSession.reader.readByte())
+			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
 			packetHandler(newSession)
 		}
 	}
@@ -73,7 +73,8 @@ class Server {
 
 		source.position = jump.position
 		node.children.forEach {
-			source.writer.writePacket(PacketNodeReveal(database.getNode(it)!!))
+			val nodeReveal = database.getNode(it)!!
+			source.writer.writePacket(PacketNodeReveal(nodeReveal))
 		}
 	}
 
