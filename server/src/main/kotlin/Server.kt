@@ -1,15 +1,16 @@
 import database.Database
-import io.ktor.network.sockets.Socket
-import io.ktor.network.sockets.openReadChannel
-import io.ktor.network.sockets.openWriteChannel
+import io.ktor.network.sockets.*
 import io.ktor.utils.io.writeBoolean
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import packet.*
+import org.jetbrains.exposed.sql.Database as ExposedDatabase
+import packet.Packet.Companion.writePacket
+import kotlin.random.Random
 
 class Server {
+	private val database = Database(
+		ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC")
+	)
 	//private val rootId = IdDispenser.next()
 	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
 	private val sessions = mutableListOf<Session>()
@@ -46,7 +47,7 @@ class Server {
 			client,
 			reader,
 			writer,
-			UserId(Database.getOrCreateUser(nameChange.name)),
+			UserId(database.getOrCreateUser(nameChange.name)),
 			NodeId(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
@@ -57,8 +58,8 @@ class Server {
 		)
 
 		while (true) {
-			val packetID = PacketId(newSession.reader.readByte())
-			val packetHandler = map[packetID] ?: error("unknown packet ID: $packetID")
+			val packetId = PacketId(newSession.reader.readByte())
+			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
 			packetHandler(newSession)
 		}
 	}
@@ -66,17 +67,17 @@ class Server {
 	private suspend fun onPacketGoTo(source: Session) {
 		val jump = source.reader.readPacketGoTo()
 
-		val node = Database.getNode(jump.position)
-			?: error("Node with ID ${jump.position} not found")
+		val node = database.getNode(jump.position)
+			?: error("Node with ID ${jump.position.value} not found")
 
 		source.position = jump.position
 		node.children.forEach {
-			val node = Database.getNode(it)!!
-			source.writer.writePacketNodeReveal(
+			val node = database.getNode(it)!!
+			source.writer.writePacket(
 				PacketNodeReveal(
 					node.id,
 					node.author == source.user,
-					node.snapshot,
+					node.latestSnapshot,
 					node.parentId!!
 				)
 			)
@@ -85,7 +86,7 @@ class Server {
 
 	private suspend fun onPacketNodeCreate(source: Session) {
 		val nodeCreation = source.reader.readPacketNodeCreate()
-		val newNode = Database.createNode(
+		val newNode = database.createNode(
 			source.user.value,
 			nodeCreation.message,
 			nodeCreation.parentId
@@ -94,7 +95,7 @@ class Server {
 		val nodeRevelation = PacketNodeReveal(//TODO: use factory function
 			newNode.id,
 			false,
-			newNode.snapshot,
+			newNode.latestSnapshot,
 			newNode.parentId!!
 		)
 		sessions.filter { it.position == newNode.parentId }.forEach {
@@ -102,7 +103,7 @@ class Server {
 				if (source == it) nodeRevelation.copy(own = true)
 				else nodeRevelation
 
-			it.writer.writePacketNodeReveal(toSend)
+			it.writer.writePacket(toSend)
 		}
 	}
 }

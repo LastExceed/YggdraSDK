@@ -14,7 +14,15 @@ data class PacketNodeReveal(
 	val own: Boolean,
 	val snapshot: Snapshot,
 	val parentId: NodeId
-) : Packet(PacketId.NODE_REVEAL)
+) : Packet(PacketId.NODE_REVEAL) {
+	override suspend fun writePacketContent(writer: ByteWriteChannel) {
+		writer.writeLong(nodeId.value)
+		writer.writeBoolean(own)
+		writer.writeString(snapshot.content)
+		writer.writeInstant(snapshot.date)
+		writer.writeLong(parentId.value)
+	}
+}
 
 suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 	return PacketNodeReveal(
@@ -23,16 +31,6 @@ suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 		snapshot = Snapshot(this.readString(), this.readInstant()),
 		parentId = NodeId(this.readLong())
 	)
-}
-
-suspend fun ByteWriteChannel.writePacketNodeReveal(packet: PacketNodeReveal) {
-	this.writeByte(packet.id.value)
-
-	this.writeLong(packet.nodeId.value)
-	this.writeBoolean(packet.own)
-	this.writeString(packet.snapshot.content)
-	this.writeInstant(packet.snapshot.date)
-	this.writeLong(packet.parentId.value)
 }
 
 suspend fun ByteWriteChannel.writeInstant(instant: Instant) {
