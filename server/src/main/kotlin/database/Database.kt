@@ -28,8 +28,8 @@ class Database(private val db: ExposedDatabase) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
-				val rootUserId = getOrCreateUser("rootuser")
-				createNode(rootUserId, "root of all evil", null)
+				val rootUserId = createUser("rootuser", "1234")
+				createNode(getUser("rootuser","1234"), "root of all evil", null)
 			}
 
 		}
@@ -58,20 +58,20 @@ class Database(private val db: ExposedDatabase) {
 		}
 	}
 
-	fun getOrCreateUser(userName: String): Long {
+	fun getUser(email: String, password: String): Long {
 		return transaction(db) {
-			val query = TableUser.select { TableUser.name eq userName }.firstOrNull()
-				?: return@transaction TableUser.insert {
-					it[name] = userName
-				} get TableUser.id
-			query[TableUser.id]
+			val row = TableUser.select { (TableUser.email eq email) and (TableUser.password eq password) }.firstOrNull()
+				?: error("Account with email: $email and password: $password not found")
+			row[TableUser.id]
 		}
 	}
 
-	fun getUserID(name: String): Long {
+	fun createUser(email: String, password: String) {
 		return transaction(db) {
-			val query = TableUser.select { TableUser.name eq name }
-			query.firstOrNull()?.get(TableUser.id) ?: error("User with name: $name does not exist")
+			TableUser.insert {
+				it[this.email] = email
+				it[this.password] = password
+			}
 		}
 	}
 
