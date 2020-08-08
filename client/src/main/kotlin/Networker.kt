@@ -54,12 +54,10 @@ object Networker {
 	}
 
 	suspend fun createNode(parent: NodeCached, text: String) {
-		val packetNodeCreate = PacketNodeCreate(parent.id, text)
-		writer.writePacket(packetNodeCreate)
+		writer.writePacket(PacketNodeCreate(parent.id, text))
 	}
 
 	suspend fun goTo(target: NodeCached) {
-		val packetGoTo = PacketGoTo(target.id)
-		writer.writePacket(packetGoTo)
+		writer.writePacket(PacketGoTo(target.id))
 	}
 }

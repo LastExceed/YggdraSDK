@@ -73,8 +73,7 @@ class Server {
 
 		source.position = jump.position
 		node.children.forEach {
-			val nodeReveal = database.getNode(it)!!
-			source.writer.writePacket(PacketNodeReveal(nodeReveal))
+			source.writer.writePacket(PacketNodeReveal(database.getNode(it)!!))
 		}
 	}
 
