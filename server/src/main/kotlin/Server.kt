@@ -46,7 +46,7 @@ class Server {
 			client,
 			reader,
 			writer,
-			UserId(database.getOrCreateUser(nameChange.name)),
+			UserId(database.getUser(login.email, login.email)),
 			NodeId(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
