@@ -43,12 +43,11 @@ class Server {
 			error("first packet must be a namechange")
 		}
 		val nameChange = reader.readPacketNameChange()
-		database.getOrCreateUser(nameChange.name)
 		val newSession = Session(
 			client,
 			reader,
 			writer,
-			nameChange.name,
+			UserId(database.getOrCreateUser(nameChange.name)),
 			NodeId(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
@@ -73,21 +72,38 @@ class Server {
 
 		source.position = jump.position
 		node.children.forEach {
-			source.writer.writePacket(PacketNodeReveal(database.getNode(it)!!))
+			val node = database.getNode(it)!!
+			source.writer.writePacket(
+				PacketNodeReveal(
+					node.id,
+					node.author == source.user,
+					node.latestSnapshot,
+					node.parentId!!
+				)
+			)
 		}
 	}
 
 	private suspend fun onPacketNodeCreate(source: Session) {
 		val nodeCreation = source.reader.readPacketNodeCreate()
 		val newNode = database.createNode(
-			database.getUserID(source.username),
+			source.user.value,
 			nodeCreation.message,
 			nodeCreation.parentId
 		)
 
-		val nodeRevelation = PacketNodeReveal(newNode)
+		val nodeRevelation = PacketNodeReveal(//TODO: use factory function
+			newNode.id,
+			false,
+			newNode.latestSnapshot,
+			newNode.parentId!!
+		)
 		sessions.filter { it.position == newNode.parentId }.forEach {
-			it.writer.writePacket(nodeRevelation)
+			val toSend =
+				if (source == it) nodeRevelation.copy(own = true)
+				else nodeRevelation
+
+			it.writer.writePacket(toSend)
 		}
 	}
 }

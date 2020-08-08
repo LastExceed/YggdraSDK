@@ -5,6 +5,6 @@ class Session(
 	val socket: Socket,
 	val reader: ByteReadChannel,
 	val writer: ByteWriteChannel,
-	val username: String,
+	val user: UserId,
 	var position: NodeId
 )

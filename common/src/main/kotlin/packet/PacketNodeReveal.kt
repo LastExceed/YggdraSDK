@@ -10,25 +10,26 @@ import writeString
 import java.time.Instant
 
 data class PacketNodeReveal(
-	val node: Node
+	val nodeId: NodeId,
+	val own: Boolean,
+	val snapshot: Snapshot,
+	val parentId: NodeId
 ) : Packet(PacketId.NODE_REVEAL) {
 	override suspend fun writePacketContent(writer: ByteWriteChannel) {
-		writer.writeLong(node.id.value)
-		writer.writeLong(node.author.value)
-		writer.writeString(node.latestSnapshot.content)
-		writer.writeInstant(node.latestSnapshot.date)
-		writer.writeLong(node.parentId?.value ?: error("tried to write root node"))
+		writer.writeLong(nodeId.value)
+		writer.writeBoolean(own)
+		writer.writeString(snapshot.content)
+		writer.writeInstant(snapshot.date)
+		writer.writeLong(parentId.value)
 	}
 }
 
 suspend fun ByteReadChannel.readPacketNodeReveal(): PacketNodeReveal {
 	return PacketNodeReveal(
-		Node(
-			id = NodeId(this.readLong()),
-			author = UserId(this.readLong()),
-			latestSnapshot = Snapshot(this.readString(), this.readInstant()),
-			parentId = NodeId(this.readLong())
-		)
+		nodeId = NodeId(this.readLong()),
+		own = this.readBoolean(),
+		snapshot = Snapshot(this.readString(), this.readInstant()),
+		parentId = NodeId(this.readLong())
 	)
 }
 

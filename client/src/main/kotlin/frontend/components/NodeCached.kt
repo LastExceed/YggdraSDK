@@ -5,7 +5,7 @@ import tornadofx.observableListOf
 
 data class NodeCached(
 	val id: NodeId,
-	val author: String,
+	val own: Boolean,
 	val message: String,
 	val parent: NodeCached?
 ) {
