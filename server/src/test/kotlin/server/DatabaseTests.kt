@@ -6,8 +6,8 @@ import database.Database
 import org.junit.jupiter.api.DynamicTest
 import kotlin.test.*
 import org.junit.jupiter.api.*
-import org.junit.jupiter.api.Test
-import random.*
+import random.CharPool
+import random.random
 import kotlin.random.Random
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 

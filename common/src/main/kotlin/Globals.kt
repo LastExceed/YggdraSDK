@@ -8,4 +8,5 @@ object Globals {
 	val serverAddress = InetSocketAddress("127.0.0.1", 12321)
 	val tcpSocketBuilder = aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
 	const val messageSizeLimit = 2000
+	const val userNameLimit = 30
 }
