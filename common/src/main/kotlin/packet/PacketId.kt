@@ -6,6 +6,6 @@ inline class PacketId(val value: Byte) {
 		val NODE_CREATE = PacketId(0)
 		val NODE_REVEAL = PacketId(1)
 		val GOTO = PacketId(2)
-		val NAMECHANGE = PacketId(3)
+		val LOGIN = PacketId(3)
 	}
 }

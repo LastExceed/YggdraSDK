@@ -5,7 +5,6 @@ import kotlinx.coroutines.*
 import packet.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 import packet.Packet.Companion.writePacket
-import kotlin.random.Random
 
 class Server {
 	private val database = Database(
@@ -39,10 +38,10 @@ class Server {
 			return
 		}
 
-		if (reader.readByte() != PacketId.NAMECHANGE.value) {
+		if (reader.readByte() != PacketId.LOGIN.value) {
 			error("first packet must be a namechange")
 		}
-		val nameChange = reader.readPacketNameChange()
+		val login = reader.readPacketLogin()
 		val newSession = Session(
 			client,
 			reader,

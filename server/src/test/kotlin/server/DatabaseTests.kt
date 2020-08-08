@@ -25,7 +25,7 @@ class DatabaseTests {
 
 	data class NodeData(
 		val authorID: Long =  Random.nextLong(),
-		val content: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,2000)),
+		val content: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.messageSizeLimit)),
 		val parentID: NodeId? = null
 	)
 
@@ -68,6 +68,22 @@ class DatabaseTests {
 			assertEquals(node.author.value, nodeData.authorID)
 			assertEquals(node.latestSnapshot.content, updateData)
 			assertEquals(node.parentId, nodeData.parentID)
+		}
+	}
+
+	data class AccountData(
+		val email: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.emailSizeLimit)),
+		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.passwordSizeLimit))
+	)
+
+	@TestFactory
+	fun createAndLoginAccount() = (1..20).map {
+		val accountData = AccountData()
+		database.createUser(accountData.email, accountData.password)
+		val iD = database.getUser(accountData.email, accountData.password)
+
+		DynamicTest.dynamicTest("$iD email: ${accountData.email} password: ${accountData.password}") {
+			assertNotNull(iD)
 		}
 	}
 }

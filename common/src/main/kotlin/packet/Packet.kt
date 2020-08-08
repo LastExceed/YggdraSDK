@@ -9,7 +9,7 @@ abstract class Packet(val id: PacketId) {
 		private val packetReaders = mapOf(
 			PacketId.NODE_CREATE to ByteReadChannel::readPacketNodeCreate,
 			PacketId.GOTO to ByteReadChannel::readPacketGoTo,
-			PacketId.NAMECHANGE to ByteReadChannel::readPacketNameChange,
+			PacketId.LOGIN to ByteReadChannel::readPacketLogin,
 			PacketId.NODE_REVEAL to ByteReadChannel::readPacketNodeReveal
 		)
 
