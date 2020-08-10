@@ -29,9 +29,12 @@ class Database(private val db: ExposedDatabase) {
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
 				val rootUserId = createUser("rootuser", "1234")
-				createNode(getUser("rootuser","1234"), "root of all evil", null)
+				createNode(
+					getUser("rootuser","1234")?.value ?: error("roo tuser not in database"),
+					"root of all evil",
+					null
+				)
 			}
-
 		}
 	}
 
