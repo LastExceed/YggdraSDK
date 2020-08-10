@@ -124,4 +124,27 @@ class PacketTests {
 			}
 		}
 	}
+
+	data class PacketLoginAcknowledgementData(
+		val authenticated: Boolean = Random.nextBoolean()
+	)
+
+	private val loginAcknowledgementTestPort = 12304
+	@TestFactory
+	fun writeAndReadPacketLoginAcknowledgement() = runBlocking { //TODO redo
+		val address = InetSocketAddress("127.0.0.1", loginAcknowledgementTestPort)
+		val listener = Globals.tcpSocketBuilder.bind(address)
+		val writer = Globals.tcpSocketBuilder.connect(address)
+			.openWriteChannel(true)
+		val reader = listener.accept().openReadChannel()
+
+		(1..testRepeats).map {
+			val random = PacketLoginAcknowledgementData()
+			val packet = PacketLoginAcknowlegdement(random.authenticated)
+
+			DynamicTest.dynamicTest("authenticated: ${random.authenticated}") {
+				writeAndReadPacket(packet, writer, reader)
+			}
+		}
+	}
 }
