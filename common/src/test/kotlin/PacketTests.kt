@@ -26,7 +26,7 @@ class PacketTests {
 		val position: NodeId = NodeId(Random.nextLong())
 	)
 
-	private val goToTestPort = 1
+	private val goToTestPort = 12300
 	@TestFactory
 	fun writeAndReadPacketGoTo() = runBlocking {
 		val address = InetSocketAddress("127.0.0.1", goToTestPort)
@@ -50,10 +50,10 @@ class PacketTests {
 		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.passwordSizeLimit))
 	)
 
-	private val nameChangeTestPort = 2
+	private val loginTestPort = 12301
 	@TestFactory
-	fun writeAndReadPacketNameChange() = runBlocking {
-		val address = InetSocketAddress("127.0.0.1", nameChangeTestPort)
+	fun writeAndReadPacketLogin() = runBlocking {
+		val address = InetSocketAddress("127.0.0.1", loginTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
 			.openWriteChannel(true)
@@ -74,7 +74,7 @@ class PacketTests {
 		val message: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
 	)
 
-	private val nodeCreateTestPort = 3
+	private val nodeCreateTestPort = 12302
 	@TestFactory
 	fun writeAndReadPacketNodeCreate() = runBlocking {
 		val address = InetSocketAddress("127.0.0.1", nodeCreateTestPort)
@@ -93,7 +93,7 @@ class PacketTests {
 		}
 	}
 
-	data class NodeData(
+	data class PacketNodeRevealData(
 		val nodeId: NodeId = NodeId(Random.nextLong()),
 		val own: Boolean = Random.nextBoolean(),
 		val snapshot: Snapshot = Snapshot(
@@ -103,7 +103,7 @@ class PacketTests {
 		val parentId: NodeId = NodeId(Random.nextLong())
 	)
 
-	private val nodeRevealTestPort = 12345
+	private val nodeRevealTestPort = 12303
 	@TestFactory
 	fun writeAndReadPacketNodeReveal() = runBlocking { //TODO redo
 		val address = InetSocketAddress("127.0.0.1", nodeRevealTestPort)
@@ -113,7 +113,7 @@ class PacketTests {
 		val reader = listener.accept().openReadChannel()
 
 		(1..testRepeats).map {
-			val random = NodeData()
+			val random = PacketNodeRevealData()
 			val packet = PacketNodeReveal(random.nodeId, random.own, random.snapshot, random.parentId)
 
 			DynamicTest.dynamicTest(
