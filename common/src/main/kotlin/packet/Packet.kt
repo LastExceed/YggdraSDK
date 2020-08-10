@@ -10,7 +10,8 @@ abstract class Packet(val id: PacketId) {
 			PacketId.NODE_CREATE to ByteReadChannel::readPacketNodeCreate,
 			PacketId.GOTO to ByteReadChannel::readPacketGoTo,
 			PacketId.LOGIN to ByteReadChannel::readPacketLogin,
-			PacketId.NODE_REVEAL to ByteReadChannel::readPacketNodeReveal
+			PacketId.NODE_REVEAL to ByteReadChannel::readPacketNodeReveal,
+			PacketId.LOGIN_ACKNOWLEDGEMENT to ByteReadChannel::readPacketLoginAcknowledgement
 		)
 
 		suspend fun ByteWriteChannel.writePacket(packet: Packet) {
