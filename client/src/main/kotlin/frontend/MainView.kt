@@ -3,26 +3,20 @@ package frontend
 import frontend.components.NodeCached
 import frontend.components.YggdraListCell
 import javafx.beans.property.SimpleListProperty
-import javafx.scene.control.TextInputDialog
 import javafx.scene.input.KeyCode
 import kotlinx.coroutines.*
 import tornadofx.*
 
 class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
-	private val username: String
 	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
 	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
 
 	init {
-		val dialog = TextInputDialog().apply {
-			headerText = "please choose a username"
-			graphic = null
-		}
-		val dialogResult = dialog.showAndWait()
-		username = dialogResult.get()
+		val dialogResult = LoginDialog().showAndWait()
+		val (email, password) = dialogResult.get()//TODO: handle login abort
 
 		launch(Dispatchers.IO) {
-			Networker.connect(username)
+			Networker.connect(email, password)
 		}
 	}
 
