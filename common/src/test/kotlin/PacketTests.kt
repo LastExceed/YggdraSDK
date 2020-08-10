@@ -45,8 +45,9 @@ class PacketTests {
 		}
 	}
 
-	data class PacketNameChangeData(
-		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.userNameLimit))
+	data class PacketLoginData(
+		val email: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.emailSizeLimit)),
+		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.passwordSizeLimit))
 	)
 
 	private val nameChangeTestPort = 2
@@ -59,10 +60,10 @@ class PacketTests {
 		val reader = listener.accept().openReadChannel()
 
 		(1..testRepeats).map {
-			val random = PacketNameChangeData()
-			val packet = PacketNameChange(random.name)
+			val random = PacketLoginData()
+			val packet = PacketLogin(random.email, random.password)
 
-			DynamicTest.dynamicTest(random.name) {
+			DynamicTest.dynamicTest("email: ${random.email}, password: ${random.password}") {
 				writeAndReadPacket(packet, writer, reader)
 			}
 		}
@@ -93,20 +94,18 @@ class PacketTests {
 	}
 
 	data class NodeData(
-		val node: Node = Node(
-			NodeId(Random.nextLong()),
-			UserId(Random.nextLong()),
-			Snapshot(
+		val nodeId: NodeId = NodeId(Random.nextLong()),
+		val own: Boolean = Random.nextBoolean(),
+		val snapshot: Snapshot = Snapshot(
 				(CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit)),
 				Instant.now() //TODO create random Instants
 			),
-			NodeId(Random.nextLong())
-		)
+		val parentId: NodeId = NodeId(Random.nextLong())
 	)
 
 	private val nodeRevealTestPort = 12345
 	@TestFactory
-	fun writeAndReadPacketNodeReveal() = runBlocking {
+	fun writeAndReadPacketNodeReveal() = runBlocking { //TODO redo
 		val address = InetSocketAddress("127.0.0.1", nodeRevealTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
@@ -114,12 +113,12 @@ class PacketTests {
 		val reader = listener.accept().openReadChannel()
 
 		(1..testRepeats).map {
-			val random = NodeData().node
-			val packet = PacketNodeReveal(random)
+			val random = NodeData()
+			val packet = PacketNodeReveal(random.nodeId, random.own, random.snapshot, random.parentId)
 
 			DynamicTest.dynamicTest(
-				"Id: ${random.id.value} author: ${random.author.value} parentId: ${random.parentId?.value}" +
-				" snapshotData: ${random.latestSnapshot.date} snapshotContent: ${random.latestSnapshot.content}"
+				"Id: ${random.nodeId.value} own: ${random.own} parentId: ${random.parentId.value}" +
+				" snapshotData: ${random.snapshot.date} snapshotContent: ${random.snapshot.content}"
 			) {
 				writeAndReadPacket(packet, writer, reader)
 			}
