@@ -1,5 +1,6 @@
 package frontend
 
+import Networker
 import frontend.components.NodeCached
 import frontend.components.YggdraListCell
 import javafx.beans.property.SimpleListProperty
@@ -10,17 +11,18 @@ import tornadofx.*
 class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
 	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
+	private val networker = Networker(Globals.serverAddress)
 
 	init {
 		do {
 			val dialogResult = LoginDialog().showAndWait()
 			val (email, password) = dialogResult.get()//TODO: handle login abort
 			val authenticated = runBlocking(Dispatchers.IO) {
-				Networker.connect(email, password)
+				networker.connect(email, password)
 			}
 		} while (!authenticated)
 		launch(Dispatchers.IO) {
-			Networker.handlePackets()
+			networker.handlePackets()
 		}
 	}
 
@@ -55,7 +57,7 @@ class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 
 				launch {
 					withContext(Dispatchers.IO) {
-						Networker.createNode(chatPath.last(), text)
+						networker.createNode(chatPath.last(), text)
 					}
 					text = ""
 				}
@@ -77,7 +79,7 @@ class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 		comments.set(target.children)
 
 		launch(Dispatchers.IO) {
-			Networker.goTo(target)
+			networker.goTo(target)
 		}
 	}
 }

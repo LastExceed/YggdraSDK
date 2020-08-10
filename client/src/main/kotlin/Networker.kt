@@ -5,8 +5,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import packet.*
 import packet.Packet.Companion.writePacket
+import java.net.InetSocketAddress
 
-object Networker {
+class Networker(val address: InetSocketAddress) {
 	private lateinit var socket: Socket
 	private lateinit var reader: ByteReadChannel
 	private lateinit var writer: ByteWriteChannel
