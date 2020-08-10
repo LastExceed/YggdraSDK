@@ -58,12 +58,13 @@ class Database(private val db: ExposedDatabase) {
 		}
 	}
 
-	fun getUser(email: String, password: String): Long {
-		return transaction(db) {
+	fun getUser(email: String, password: String): UserId? {
+		val userId = transaction(db) {
 			val row = TableUser.select { (TableUser.email eq email) and (TableUser.password eq password) }.firstOrNull()
-				?: error("Account with email: $email and password: $password not found")
+				?: return@transaction null
 			row[TableUser.id]
 		}
+		return if(userId == null) null else UserId(userId)
 	}
 
 	fun createUser(email: String, password: String) {

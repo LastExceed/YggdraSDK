@@ -1,6 +1,6 @@
 import database.Database
 import io.ktor.network.sockets.*
-import io.ktor.utils.io.writeBoolean
+import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import packet.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
@@ -38,15 +38,13 @@ class Server {
 			return
 		}
 
-		if (reader.readByte() != PacketId.LOGIN.value) {
-			error("first packet must be a namechange")
-		}
-		val login = reader.readPacketLogin()
+		val login = handleLogin(reader, writer) ?: return client.dispose()
+
 		val newSession = Session(
 			client,
 			reader,
 			writer,
-			UserId(database.getUser(login.email, login.email)),
+			login,
 			NodeId(1L)//TODO: dont hardcode root ID
 		)
 		sessions.add(newSession)
@@ -61,6 +59,17 @@ class Server {
 			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
 			packetHandler(newSession)
 		}
+	}
+
+	private suspend fun handleLogin(reader: ByteReadChannel, writer: ByteWriteChannel): UserId? {
+		if (reader.readByte() != PacketId.LOGIN.value) {
+			error("first packet must be a login")
+		}
+		val login = reader.readPacketLogin()
+		val userId = database.getUser(login.email, login.password)
+		val authenticated = userId != null
+		writer.writePacket(PacketLoginAcknowlegdement(authenticated))
+		return userId
 	}
 
 	private suspend fun onPacketGoTo(source: Session) {
