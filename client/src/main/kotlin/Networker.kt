@@ -11,7 +11,7 @@ object Networker {
 	private lateinit var reader: ByteReadChannel
 	private lateinit var writer: ByteWriteChannel
 
-	suspend fun connect(email: String, password: String) {
+	suspend fun connect(email: String, password: String): Boolean {
 		socket = Globals.tcpSocketBuilder.connect(Globals.serverAddress)
 		reader = socket.openReadChannel()
 		writer = socket.openWriteChannel(true)
@@ -21,8 +21,10 @@ object Networker {
 		if (!response) {
 			error("outdated")
 		}
-		val authenticated = login(email, password)
+		return login(email, password)
+	}
 
+	suspend fun handlePackets() {
 		writer.writePacket(PacketGoTo(NodeId(1L)))//TODO: dont hardcode root ID
 		while (true) {
 			val packetID = PacketId(reader.readByte())
