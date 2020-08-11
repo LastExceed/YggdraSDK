@@ -12,13 +12,13 @@ class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
 
 	init {
-		var authenticated = false
-		while (!authenticated) { val dialogResult = LoginDialog().showAndWait()
+		do {
+			val dialogResult = LoginDialog().showAndWait()
 			val (email, password) = dialogResult.get()//TODO: handle login abort
-			authenticated = runBlocking(Dispatchers.IO) {
+			val authenticated = runBlocking(Dispatchers.IO) {
 				Networker.connect(email, password)
 			}
-		}
+		} while (!authenticated)
 		launch(Dispatchers.IO) {
 			Networker.handlePackets()
 		}

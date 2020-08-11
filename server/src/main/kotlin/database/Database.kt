@@ -28,9 +28,8 @@ class Database(private val db: ExposedDatabase) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
-				val rootUserId = createUser("rootuser", "1234")
 				createNode(
-					getUser("rootuser","1234")?.value ?: error("root user not in database"),
+					getUser("rootuser@test","1234")?.value ?: error("root user not in database"),
 					"root of all evil",
 					null
 				)
@@ -67,7 +66,7 @@ class Database(private val db: ExposedDatabase) {
 				?: return@transaction null
 			row[TableUser.id]
 		}
-		return if(userId == null) null else UserId(userId)
+		return userId?.let { UserId(userId) }
 	}
 
 	fun createUser(email: String, password: String) {
