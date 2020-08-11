@@ -6,12 +6,7 @@ import packet.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 import packet.Packet.Companion.writePacket
 
-class Server {
-	private val database = Database(
-		ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC")
-	)
-	//private val rootId = IdDispenser.next()
-	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
+class Server(private val database: Database) {
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
