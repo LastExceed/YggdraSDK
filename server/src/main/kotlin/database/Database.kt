@@ -16,8 +16,6 @@ import java.sql.SQLException
 import java.time.Instant
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
-
-//TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
 	private val rootLogin = "rootuser@example.com" to "1234"
 

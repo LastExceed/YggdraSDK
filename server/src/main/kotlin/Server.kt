@@ -10,8 +10,7 @@ class Server {
 	private val database = Database(
 		ExposedDatabase.connect("jdbc:sqlite:/data/database.db", "org.sqlite.JDBC")
 	)
-	//private val rootId = IdDispenser.next()
-	//private val tree = mutableMapOf(rootId to Node(rootId, "rootuser", "this is the root node", NodeId(-1)))
+
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
@@ -100,7 +99,7 @@ class Server {
 			nodeCreation.parentId
 		)
 
-		val nodeRevelation = PacketNodeReveal(//TODO: use factory function
+		val nodeRevelation = PacketNodeReveal(
 			newNode.id,
 			false,
 			newNode.latestSnapshot,
