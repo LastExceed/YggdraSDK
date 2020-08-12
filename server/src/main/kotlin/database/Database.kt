@@ -32,7 +32,7 @@ class Database(private val db: ExposedDatabase) {
 				createNode(
 					getUser(rootLogin.first, rootLogin.second)?.value ?: error("root user not in database"),
 					"root of all evil",
-				null
+					null
 				)
 			}
 		}
