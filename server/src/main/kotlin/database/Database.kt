@@ -108,9 +108,7 @@ class Database(private val db: ExposedDatabase) {
 				NodeId(position.value),
 				UserId(query[TableNode.author]),
 				getSnapshot(query[TableNode.lastSnapshot])!!,
-				query[TableNode.parent].let {
-					if(it != null) NodeId(it) else null
-				} //TODO fix this.rumhampelei
+				query[TableNode.parent]?.let { NodeId(it) }
 			)
 
 			val query2 = TableNode.select { TableNode.parent eq node.id.value }//TODO: only query IDs instead of whole nodes
