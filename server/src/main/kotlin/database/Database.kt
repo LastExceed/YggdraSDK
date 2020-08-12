@@ -104,7 +104,7 @@ class Database(private val db: ExposedDatabase) {
 			val queryParent = TableNode.select { TableNode.id eq position.value }.firstOrNull()
 				?: return@transaction null
 
-			val queryChildren = TableNode.select { TableNode.parent eq position.value }//TODO: only query IDs instead of whole nodes
+			val queryChildren = TableNode.slice(TableNode.id).select { TableNode.parent eq position.value }
 
 			Node(
 				position,
