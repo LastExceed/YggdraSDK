@@ -19,7 +19,7 @@ import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
 //TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
-	//jdbc:sqlite:/data/database.db TODO: change to relative path
+	private val rootLogin = "rootuser@example.com" to "1234"
 
 	init {
 		db.useNestedTransactions = true
@@ -28,10 +28,13 @@ class Database(private val db: ExposedDatabase) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
-				val rootUserId = getOrCreateUser("rootuser")
-				createNode(rootUserId, "root of all evil", null)
+				createUser(rootLogin.first, rootLogin.second)
+				createNode(
+					getUser(rootLogin.first, rootLogin.second)?.value ?: error("root user not in database"),
+					"root of all evil",
+				null
+				)
 			}
-
 		}
 	}
 
@@ -58,20 +61,21 @@ class Database(private val db: ExposedDatabase) {
 		}
 	}
 
-	fun getOrCreateUser(userName: String): Long {
-		return transaction(db) {
-			val query = TableUser.select { TableUser.name eq userName }.firstOrNull()
-				?: return@transaction TableUser.insert {
-					it[name] = userName
-				} get TableUser.id
-			query[TableUser.id]
+	fun getUser(email: String, password: String): UserId? {
+		val userId = transaction(db) {
+			val row = TableUser.select { (TableUser.email eq email) and (TableUser.password eq password) }.firstOrNull()
+				?: return@transaction null
+			row[TableUser.id]
 		}
+		return userId?.let { UserId(userId) }
 	}
 
-	fun getUserID(name: String): Long {
+	fun createUser(email: String, password: String) {
 		return transaction(db) {
-			val query = TableUser.select { TableUser.name eq name }
-			query.firstOrNull()?.get(TableUser.id) ?: error("User with name: $name does not exist")
+			TableUser.insert {
+				it[this.email] = email
+				it[this.password] = password
+			}
 		}
 	}
 

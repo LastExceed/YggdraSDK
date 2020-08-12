@@ -26,7 +26,7 @@ class PacketTests {
 		val position: NodeId = NodeId(Random.nextLong())
 	)
 
-	private val goToTestPort = 1
+	private val goToTestPort = 12300
 	@TestFactory
 	fun writeAndReadPacketGoTo() = runBlocking {
 		val address = InetSocketAddress("127.0.0.1", goToTestPort)
@@ -45,24 +45,25 @@ class PacketTests {
 		}
 	}
 
-	data class PacketNameChangeData(
-		val name: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.userNameLimit))
+	data class PacketLoginData(
+		val email: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.emailSizeLimit)),
+		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.passwordSizeLimit))
 	)
 
-	private val nameChangeTestPort = 2
+	private val loginTestPort = 12301
 	@TestFactory
-	fun writeAndReadPacketNameChange() = runBlocking {
-		val address = InetSocketAddress("127.0.0.1", nameChangeTestPort)
+	fun writeAndReadPacketLogin() = runBlocking {
+		val address = InetSocketAddress("127.0.0.1", loginTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
 			.openWriteChannel(true)
 		val reader = listener.accept().openReadChannel()
 
 		(1..testRepeats).map {
-			val random = PacketNameChangeData()
-			val packet = PacketNameChange(random.name)
+			val random = PacketLoginData()
+			val packet = PacketLogin(random.email, random.password)
 
-			DynamicTest.dynamicTest(random.name) {
+			DynamicTest.dynamicTest("email: ${random.email}, password: ${random.password}") {
 				writeAndReadPacket(packet, writer, reader)
 			}
 		}
@@ -73,7 +74,7 @@ class PacketTests {
 		val message: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
 	)
 
-	private val nodeCreateTestPort = 3
+	private val nodeCreateTestPort = 12302
 	@TestFactory
 	fun writeAndReadPacketNodeCreate() = runBlocking {
 		val address = InetSocketAddress("127.0.0.1", nodeCreateTestPort)
@@ -92,21 +93,19 @@ class PacketTests {
 		}
 	}
 
-	data class NodeData(
-		val node: Node = Node(
-			NodeId(Random.nextLong()),
-			UserId(Random.nextLong()),
-			Snapshot(
+	data class PacketNodeRevealData(
+		val nodeId: NodeId = NodeId(Random.nextLong()),
+		val own: Boolean = Random.nextBoolean(),
+		val snapshot: Snapshot = Snapshot(
 				(CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit)),
 				Instant.now() //TODO create random Instants
 			),
-			NodeId(Random.nextLong())
-		)
+		val parentId: NodeId = NodeId(Random.nextLong())
 	)
 
-	private val nodeRevealTestPort = 12345
+	private val nodeRevealTestPort = 12303
 	@TestFactory
-	fun writeAndReadPacketNodeReveal() = runBlocking {
+	fun writeAndReadPacketNodeReveal() = runBlocking { //TODO redo
 		val address = InetSocketAddress("127.0.0.1", nodeRevealTestPort)
 		val listener = Globals.tcpSocketBuilder.bind(address)
 		val writer = Globals.tcpSocketBuilder.connect(address)
@@ -114,13 +113,36 @@ class PacketTests {
 		val reader = listener.accept().openReadChannel()
 
 		(1..testRepeats).map {
-			val random = NodeData().node
-			val packet = PacketNodeReveal(random)
+			val random = PacketNodeRevealData()
+			val packet = PacketNodeReveal(random.nodeId, random.own, random.snapshot, random.parentId)
 
 			DynamicTest.dynamicTest(
-				"Id: ${random.id.value} author: ${random.author.value} parentId: ${random.parentId?.value}" +
-				" snapshotData: ${random.latestSnapshot.date} snapshotContent: ${random.latestSnapshot.content}"
+				"Id: ${random.nodeId.value} own: ${random.own} parentId: ${random.parentId.value}" +
+				" snapshotData: ${random.snapshot.date} snapshotContent: ${random.snapshot.content}"
 			) {
+				writeAndReadPacket(packet, writer, reader)
+			}
+		}
+	}
+
+	data class PacketLoginAcknowledgementData(
+		val authenticated: Boolean = Random.nextBoolean()
+	)
+
+	private val loginAcknowledgementTestPort = 12304
+	@TestFactory
+	fun writeAndReadPacketLoginAcknowledgement() = runBlocking { //TODO redo
+		val address = InetSocketAddress("127.0.0.1", loginAcknowledgementTestPort)
+		val listener = Globals.tcpSocketBuilder.bind(address)
+		val writer = Globals.tcpSocketBuilder.connect(address)
+			.openWriteChannel(true)
+		val reader = listener.accept().openReadChannel()
+
+		(1..testRepeats).map {
+			val random = PacketLoginAcknowledgementData()
+			val packet = PacketLoginAcknowlegdement(random.authenticated)
+
+			DynamicTest.dynamicTest("authenticated: ${random.authenticated}") {
 				writeAndReadPacket(packet, writer, reader)
 			}
 		}
