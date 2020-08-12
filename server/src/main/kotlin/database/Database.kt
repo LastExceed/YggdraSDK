@@ -25,7 +25,7 @@ class Database(private val db: ExposedDatabase) {
 		transaction(db) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
-			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
+			if (!TableNode.exists { TableNode.id eq Globals.rootId.value }) {
 				createUser(rootLogin.first, rootLogin.second)
 				createNode(
 					getUser(rootLogin.first, rootLogin.second)?.value ?: error("root user not in database"),

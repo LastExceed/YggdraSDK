@@ -10,4 +10,5 @@ object Globals {
 	const val messageSizeLimit = 2000
 	const val emailSizeLimit = 40
 	const val passwordSizeLimit = 40
+	val rootId = NodeId(1L)
 }

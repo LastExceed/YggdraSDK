@@ -44,7 +44,7 @@ class Server {
 			reader,
 			writer,
 			login,
-			NodeId(1L)//TODO: dont hardcode root ID
+			Globals.rootId
 		)
 		sessions.add(newSession)
 
