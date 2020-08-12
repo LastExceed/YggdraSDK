@@ -54,7 +54,8 @@ class Database(private val db: ExposedDatabase) {
 				NodeId(nodeId),
 				UserId(authorId),
 				snapshotPair.first,
-				parent
+				parent,
+				listOf()
 			)
 		}
 	}
@@ -100,19 +101,18 @@ class Database(private val db: ExposedDatabase) {
 
 	fun getNode(position: NodeId): Node? {
 		return transaction(db) {
-			val query = TableNode.select { TableNode.id eq position.value }.firstOrNull()
+			val queryParent = TableNode.select { TableNode.id eq position.value }.firstOrNull()
 				?: return@transaction null
-			val node = Node(
-				NodeId(position.value),
-				UserId(query[TableNode.author]),
-				getSnapshot(query[TableNode.lastSnapshot])!!,
-				query[TableNode.parent]?.let { NodeId(it) }
-			)
 
-			val query2 = TableNode.select { TableNode.parent eq node.id.value }//TODO: only query IDs instead of whole nodes
-			val children = query2.map { NodeId(it[TableNode.id]) }
-			node.children.addAll(children)
-			node
+			val queryChildren = TableNode.select { TableNode.parent eq position.value }//TODO: only query IDs instead of whole nodes
+
+			Node(
+				position,
+				UserId(queryParent[TableNode.author]),
+				getSnapshot(queryParent[TableNode.lastSnapshot])!!,
+				queryParent[TableNode.parent]?.let { NodeId(it) },
+				queryChildren.map { NodeId(it[TableNode.id]) }
+			)
 		}
 	}
 
