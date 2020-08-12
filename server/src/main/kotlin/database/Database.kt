@@ -19,7 +19,7 @@ import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
 //TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
-	//jdbc:sqlite:/data/database.db TODO: change to relative path
+	private val rootLogin = "rootuser@example.com" to "1234"
 
 	init {
 		db.useNestedTransactions = true
@@ -28,10 +28,11 @@ class Database(private val db: ExposedDatabase) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
 			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
+				createUser(rootLogin.first, rootLogin.second)
 				createNode(
-					getUser("rootuser@test","1234")?.value ?: error("root user not in database"),
+					getUser(rootLogin.first, rootLogin.second)?.value ?: error("root user not in database"),
 					"root of all evil",
-					null
+				null
 				)
 			}
 		}
