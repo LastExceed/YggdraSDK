@@ -15,6 +15,16 @@ allprojects {
 			freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
 		}
 	}
+
+	buildscript {
+		repositories {
+			mavenCentral()
+		}
+
+		dependencies {
+			classpath("org.jetbrains.kotlin","kotlin-gradle-plugin","1.3.72")
+		}
+	}
 }
 
 subprojects {
@@ -68,15 +78,5 @@ project(":client") {
 		implementation(project(":common"))
 		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
 		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.8")
-	}
-}
-
-buildscript {
-	repositories {
-		mavenCentral()
-	}
-
-	dependencies {
-		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.70")
 	}
 }
