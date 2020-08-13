@@ -8,34 +8,28 @@ buildscript {
 }
 
 plugins {
-	java
 	id("org.jetbrains.intellij") version "0.4.21"
 	kotlin("jvm") version "1.3.72"
 	idea
 }
 
-group = "LastExceed"
-version = "1.0-SNAPSHOT"
-
 repositories {
 	mavenCentral()
-}
-
-java {
-	sourceCompatibility = JavaVersion.VERSION_13
-	targetCompatibility = JavaVersion.VERSION_13
 }
 
 dependencies {
 	compileOnly(kotlin("stdlib-jdk8"))
 }
 
+allprojects {
+	group = "LastExceed"
+	version = "1.0-SNAPSHOT"
 
-tasks.withType<KotlinCompile> {
-	kotlinOptions {
-		freeCompilerArgs = listOf("-Xjsr305=strict")
-		jvmTarget = JavaVersion.VERSION_1_8.toString()
-		freeCompilerArgs.plus("-progressive")
+	tasks.withType<KotlinCompile> {
+		kotlinOptions {
+			freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
+			jvmTarget = "13"
+		}
 	}
 }
 defaultTasks("clean", "buildPlugin")
