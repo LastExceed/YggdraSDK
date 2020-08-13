@@ -1,86 +1,65 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+	repositories {
+		mavenCentral()
+		maven("https://dl.bintray.com/jetbrains/intellij-plugin-service")
+	}
+}
+
 plugins {
-	kotlin("jvm") version "1.3.72"
-	id("org.openjfx.javafxplugin") version "0.0.8"
+	java
+	id("org.jetbrains.intellij") version "0.4.21"
+	kotlin("jvm") version "1.3.71"
+	idea
 }
 
-allprojects {
-	group = "LastExceed"
-	version = "1.0-SNAPSHOT"
+group = "com.github.gindex"
+version = "1.1.3"
 
-	tasks.withType<KotlinCompile> {
-		kotlinOptions {
-			jvmTarget = "13"
-			freeCompilerArgs = listOf("-XXLanguage:+InlineClasses")
-		}
-	}
-
-	repositories {
-		mavenCentral()
-	}
-
-	buildscript {
-		repositories {
-			mavenCentral()
-		}
-
-		dependencies {
-			classpath("org.jetbrains.kotlin","kotlin-gradle-plugin","1.3.72")
-		}
-	}
+repositories {
+	mavenCentral()
 }
 
-subprojects {
-	apply(plugin = "java")
-	apply(plugin = "org.jetbrains.kotlin.jvm")
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
 
-	repositories {
-		mavenCentral()
-		jcenter()
-	}
+val ideaVersion: String by project
+val ideaType: String by project
+val downloadIdeaSources: String by project
 
-	dependencies {
-		implementation(kotlin("stdlib-jdk8"))
-		implementation("io.ktor", "ktor-network", "1.3.1")
-		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
-		testImplementation(kotlin("test-junit5"))
+//intellij {
+//	version = ideaVersion
+//	type = ideaType
+//	pluginName = "JavaDoc HTML Cleaner"
+//	setPlugins("java")
+//	downloadSources = downloadIdeaSources.toBoolean()
+//	sandboxDirectory = project.rootDir.canonicalPath + "/.sandbox"
+//}
+
+dependencies {
+	compileOnly(kotlin("stdlib-jdk8"))
+}
+
+
+tasks.withType<KotlinCompile> {
+	kotlinOptions {
+		freeCompilerArgs = listOf("-Xjsr305=strict")
+		jvmTarget = JavaVersion.VERSION_1_8.toString()
+		freeCompilerArgs.plus("-progressive")
 	}
 }
 
-project(":server") {
-	dependencies {
-		implementation(project(":common"))
-		setOf(
-			"core",
-			"dao",
-			"jdbc",
-			"java-time"
-		).forEach { implementation("org.jetbrains.exposed", "exposed-$it", "0.25.1") }
-		implementation("org.xerial","sqlite-jdbc","3.30.1")
-		implementation("org.slf4j","slf4j-simple","1.7.25")
-		testImplementation("com.zaxxer","HikariCP","3.4.2")
-	}
-}
+//idea {
+//	module {
+//		isDownloadJavadoc = false
+//		isDownloadSources = true
+//
+//		excludeDirs.add(file(intellij.sandboxDirectory))
+//		excludeDirs.add(file("testData"))
+//	}
+//}
 
-project(":client") {
-	apply(plugin = "org.openjfx.javafxplugin")
-	repositories {
-		maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
-	}
-	javafx {
-		version = "14"
-		modules(
-			"javafx.controls",
-			"javafx.fxml",
-			"javafx.media",
-			"javafx.web",
-			"javafx.swing"
-		)
-	}
-	dependencies {
-		implementation(project(":common"))
-		implementation("no.tornado","tornadofx","2.0.0-SNAPSHOT")
-		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.8")
-	}
-}
+defaultTasks("clean", "buildPlugin")
