@@ -70,3 +70,13 @@ project(":client") {
 		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.3.8")
 	}
 }
+
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.70")
+	}
+}
