@@ -5,12 +5,13 @@ import kotlinx.coroutines.*
 import packet.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 import packet.Packet.Companion.writePacket
+import java.net.InetSocketAddress
 
-class Server(private val database: Database) {
+class Server(private val database: Database, private val address: InetSocketAddress) {
 	private val sessions = mutableListOf<Session>()
 
 	suspend fun start() {
-		val listener = Globals.tcpSocketBuilder.bind(Globals.serverAddress)
+		val listener = Globals.tcpSocketBuilder.bind(address)
 
 		val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 		while (true) {
