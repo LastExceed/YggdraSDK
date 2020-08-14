@@ -24,7 +24,7 @@ class PacketTests {
 
 	data class PacketGoToData(
 		val position: NodeId = NodeId(Random.nextLong())
-	)
+	) //TODO put testing data classes in one shared directory
 
 	private val goToTestPort = 12300
 	@TestFactory
