@@ -32,4 +32,22 @@ allprojects {
 		}
 	}
 }
+
+subprojects {
+	apply(plugin = "java")
+	apply(plugin = "org.jetbrains.kotlin.jvm")
+
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+
+	dependencies {
+		implementation(kotlin("stdlib-jdk8"))
+		implementation("io.ktor", "ktor-network", "1.3.1")
+		implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.8")
+		testImplementation(kotlin("test-junit5"))
+	}
+}
+
 defaultTasks("clean", "buildPlugin")
