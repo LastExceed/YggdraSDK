@@ -11,20 +11,7 @@ import tornadofx.*
 class MainView : View("YggdraChat"), CoroutineScope by MainScope() {
 	private val chatPath = SimpleListProperty(observableListOf(NodeCache.root))
 	private val comments = SimpleListProperty(observableListOf(NodeCache.root.children))
-	private val networker = Networker(Globals.serverAddress)
-
-	init {
-		do {
-			val dialogResult = LoginDialog().showAndWait()
-			val (email, password) = dialogResult.get()//TODO: handle login abort
-			val authenticated = runBlocking(Dispatchers.IO) {
-				networker.connect(email, password)
-			}
-		} while (!authenticated)
-		launch(Dispatchers.IO) {
-			networker.handlePackets()
-		}
-	}
+	private val networker: Networker = Networker(Globals.serverAddress)
 
 	override val root = form {
 		hbox {
