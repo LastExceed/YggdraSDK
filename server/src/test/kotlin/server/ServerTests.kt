@@ -25,12 +25,11 @@ class ServerTests {
 	)
 
 	private val loginAmount: Int = 1000
-	private val networkerAmount: Int = max(loginAmount / 100, 10)
 	private val loginRandomUsersTestPort: Int = 12310
 	@TestFactory
 	fun loginRandomUsers () = runBlocking {
 			val address = InetSocketAddress("127.0.0.1", loginRandomUsersTestPort)
-			val server = createServerTest(address)
+			val server = createTestServer(address)
 			launch {
 				server.start()
 			}
@@ -62,7 +61,7 @@ class ServerTests {
 	}
 }
 
-fun createServerTest(address: InetSocketAddress): Server {
+fun createTestServer(address: InetSocketAddress): Server {
 	val cfg: HikariConfig = HikariConfig().apply {
 		jdbcUrl = "jdbc:sqlite::memory:"
 		maximumPoolSize = 6
