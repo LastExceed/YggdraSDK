@@ -46,8 +46,8 @@ class PacketTests {
 	}
 
 	data class PacketLoginData(
-		val email: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.emailSizeLimit)),
-		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.passwordSizeLimit))
+		val email: String = CharPool.ASCII.value.randomLength(Globals.emailSizeLimit),
+		val password: String = CharPool.ASCII.value.randomLength(Globals.emailSizeLimit)
 	)
 
 	private val loginTestPort = 12301
@@ -71,7 +71,7 @@ class PacketTests {
 
 	data class PacketNodeCreateData(
 		val parentId: NodeId = NodeId(Random.nextLong()),
-		val message: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit))
+		val message: String = (CharPool.ASCII.value + '\n').randomLength(Globals.messageSizeLimit)
 	)
 
 	private val nodeCreateTestPort = 12302
@@ -97,7 +97,7 @@ class PacketTests {
 		val nodeId: NodeId = NodeId(Random.nextLong()),
 		val own: Boolean = Random.nextBoolean(),
 		val snapshot: Snapshot = Snapshot(
-				(CharPool.ASCII.value + '\n').random(Random.nextInt(1, Globals.messageSizeLimit)),
+				(CharPool.ASCII.value + '\n').randomLength(Globals.messageSizeLimit),
 				Instant.now() //TODO create random Instants
 			),
 		val parentId: NodeId = NodeId(Random.nextLong())

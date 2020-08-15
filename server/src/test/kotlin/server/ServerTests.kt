@@ -36,15 +36,15 @@ class ServerTests {
 			}
 
 			val emails: Set<String> = (1..loginAmount)
-				.map { CharPool.ASCII.value.random(Random.nextInt(1, Globals.emailSizeLimit)) }.toSet()
+				.map { CharPool.ASCII.value.randomLength(Globals.emailSizeLimit) }.toSet()
 
 			val accounts = emails.map { email ->
 				TestAccounts(PacketLogin(
 					email,
-					CharPool.ASCII.value.random(Random.nextInt(1, Globals.passwordSizeLimit)))
+					CharPool.ASCII.value.randomLength(Globals.passwordSizeLimit))
 				)
 			}
-		
+
 			val tests = accounts.map { account ->
 				if(account.registerUser)
 					server.registerUser(account.packet.email, account.packet.password)
@@ -74,7 +74,7 @@ fun createServerTest(address: InetSocketAddress): Server {
 
 inline class PacketLoginData(
 	val value: PacketLogin = PacketLogin(
-		CharPool.ASCII.value.random(Random.nextInt(1, Globals.emailSizeLimit)),
-		CharPool.ASCII.value.random(Random.nextInt(1, Globals.passwordSizeLimit))
+		CharPool.ASCII.value.randomLength(Globals.emailSizeLimit),
+		CharPool.ASCII.value.randomLength(Globals.passwordSizeLimit)
 	)
 )

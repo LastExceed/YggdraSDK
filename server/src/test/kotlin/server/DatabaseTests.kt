@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DynamicTest
 import kotlin.test.*
 import org.junit.jupiter.api.*
 import random.CharPool
-import random.random
+import random.*
 import kotlin.random.Random
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
@@ -25,7 +25,7 @@ class DatabaseTests {
 
 	data class NodeData(
 		val authorID: Long =  Random.nextLong(),
-		val content: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.messageSizeLimit)),
+		val content: String = (CharPool.ASCII.value + '\n').randomLength(Globals.messageSizeLimit),
 		val parentID: NodeId? = null
 	)
 
@@ -58,7 +58,7 @@ class DatabaseTests {
 	@TestFactory
 	fun createAndUpdateNode() = (1..20).toList().map {
 		val nodeData = NodeData()
-		val updateData = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,2000))
+	val updateData = (CharPool.ASCII.value + '\n').randomLength(Globals.messageSizeLimit)
 
 		DynamicTest.dynamicTest("ID: ${nodeData.authorID} content: ${nodeData.content}") {
 			val nodeID = database.createNode(nodeData.authorID, nodeData.content, nodeData.parentID).id
@@ -72,8 +72,8 @@ class DatabaseTests {
 	}
 
 	data class AccountData(
-		val email: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.emailSizeLimit)),
-		val password: String = (CharPool.ASCII.value + '\n').random(Random.nextInt(1,Globals.passwordSizeLimit))
+		val email: String = CharPool.ASCII.value.randomLength(Globals.emailSizeLimit),
+		val password: String = CharPool.ASCII.value.randomLength(Globals.passwordSizeLimit)
 	)
 
 	@TestFactory
