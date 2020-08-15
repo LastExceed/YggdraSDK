@@ -3,24 +3,39 @@ import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import packet.*
-import org.jetbrains.exposed.sql.Database as ExposedDatabase
 import packet.Packet.Companion.writePacket
 import java.net.InetSocketAddress
+import java.net.SocketException
 
 class Server(private val database: Database, private val address: InetSocketAddress) {
 	private val sessions = mutableListOf<Session>()
+	private var isRunning = true
+	private val listener = Globals.tcpSocketBuilder.bind(address)
+	private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 	suspend fun start() {
-		val listener = Globals.tcpSocketBuilder.bind(address)
-
-		val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-		while (true) {
-			val client = listener.accept()
-			scope.launch {
-				handleClient(client)
+		while (isRunning) {
+			try {
+				val client = listener.accept()
+				scope.launch {
+					handleClient(client)
+				}
+			} catch (e: Throwable) {
+				println("Socket closed with message: ${e.message}")
 			}
 		}
 	}
+
+	fun stop() {
+		try {
+			isRunning = false
+			listener.dispose()
+			sessions.forEach { it.socket.dispose() }
+		} catch (e: Throwable) {
+			println(e.message)
+		}
+
+	} //TODO send disconnect package?
 
 	private suspend fun handleClient(client: Socket) {
 		val reader = client.openReadChannel()
@@ -50,7 +65,7 @@ class Server(private val database: Database, private val address: InetSocketAddr
 			PacketId.GOTO to ::onPacketGoTo
 		)
 
-		while (true) {
+		while (isRunning) {
 			val packetId = PacketId(newSession.reader.readByte())
 			val packetHandler = map[packetId] ?: error("unknown packet ID: ${packetId.value}")
 			packetHandler(newSession)
@@ -76,13 +91,13 @@ class Server(private val database: Database, private val address: InetSocketAddr
 
 		source.position = jump.position
 		node.children.forEach {
-			val node = database.getNode(it)!!
+			val fetchedNode = database.getNode(it)!!
 			source.writer.writePacket(
 				PacketNodeReveal(
-					node.id,
-					node.author == source.user,
-					node.latestSnapshot,
-					node.parentId!!
+					fetchedNode.id,
+					fetchedNode.author == source.user,
+					fetchedNode.latestSnapshot,
+					fetchedNode.parentId!!
 				)
 			)
 		}
