@@ -7,7 +7,7 @@ import packet.Packet.Companion.writePacket
 import java.net.InetSocketAddress
 import java.net.SocketException
 
-class Server(private val database: Database, private val address: InetSocketAddress) {
+class Server(private val database: Database, address: InetSocketAddress) {
 	private val sessions = mutableListOf<Session>()
 	private var isRunning = true
 	private val listener = Globals.tcpSocketBuilder.bind(address)
@@ -36,6 +36,10 @@ class Server(private val database: Database, private val address: InetSocketAddr
 		}
 
 	} //TODO send disconnect package?
+
+	fun registerUser(email: String, password: String) {
+		database.createUser(email, password)
+	}
 
 	private suspend fun handleClient(client: Socket) {
 		val reader = client.openReadChannel()
