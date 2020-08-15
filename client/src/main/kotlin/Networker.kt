@@ -13,7 +13,7 @@ class Networker(val address: InetSocketAddress) {
 	private lateinit var writer: ByteWriteChannel
 
 	suspend fun connect(email: String, password: String): Boolean {
-		socket = Globals.tcpSocketBuilder.connect(Globals.serverAddress)
+		socket = Globals.tcpSocketBuilder.connect(address)
 		reader = socket.openReadChannel()
 		writer = socket.openWriteChannel(true)
 
