@@ -35,8 +35,14 @@ subprojects {
 }
 
 project(":server") {
+	apply(plugin = "org.openjfx.javafxplugin")
+	repositories {
+		maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
+	}
+
 	dependencies {
 		implementation(project(":common"))
+		implementation(project(":client"))
 		setOf(
 			"core",
 			"dao",

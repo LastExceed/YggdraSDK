@@ -1,18 +1,22 @@
 import frontend.components.NodeCached
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import javafx.application.Application.launch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import packet.*
 import packet.Packet.Companion.writePacket
+import java.net.InetSocketAddress
 
-object Networker {
+class Networker(val address: InetSocketAddress) {
 	private lateinit var socket: Socket
 	private lateinit var reader: ByteReadChannel
 	private lateinit var writer: ByteWriteChannel
+	private var isRunning: Boolean = true
 
 	suspend fun connect(email: String, password: String): Boolean {
-		socket = Globals.tcpSocketBuilder.connect(Globals.serverAddress)
+		socket = Globals.tcpSocketBuilder.connect(address)
 		reader = socket.openReadChannel()
 		writer = socket.openWriteChannel(true)
 
@@ -25,16 +29,29 @@ object Networker {
 	}
 
 	suspend fun handlePackets() {
-		writer.writePacket(PacketGoTo(Globals.rootId))
-		while (true) {
-			val packetID = PacketId(reader.readByte())
-			when (packetID) { //use a map instead
-				PacketId.NODE_REVEAL -> onPacketNodeReveal()
+		writer.writePacket(PacketGoTo(Globals.rootId))//TODO: dont hardcode root ID
+		while (isRunning) {
+			try {
+				val packetID = PacketId(reader.readByte())
+				when (packetID) { //use a map instead
+					PacketId.NODE_REVEAL -> onPacketNodeReveal()
 
-				else -> error("unknown packetId: $packetID")
+					else -> error("unknown packetId: $packetID")
+				}
+			} catch (e: Throwable) {
+				println("Socket closed with message: ${e.message}")
 			}
 		}
 	}
+
+	fun stop() {
+		try {
+			isRunning = false
+			socket.dispose()
+		} catch (e: Throwable) {
+			println(e.message)
+		}
+	} //TODO send disconnect package?
 
 	private suspend fun login(email: String, password: String): Boolean {
 		writer.writePacket(PacketLogin(email, password))
