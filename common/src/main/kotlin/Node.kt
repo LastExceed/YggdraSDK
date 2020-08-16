@@ -4,11 +4,9 @@ data class Node(
 	val id: NodeId,
 	val author: UserId,
 	val latestSnapshot: Snapshot,
-	val parentId: NodeId?
-) {
-	val children = mutableListOf<NodeId>()
-	//TODO: use immutable list in constructor
-}
+	val parentId: NodeId?,
+	val children: List<NodeId>
+)
 
 inline class NodeId(val value: Long)
 

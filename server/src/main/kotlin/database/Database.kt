@@ -12,8 +12,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.*
 import org.jetbrains.exposed.sql.Database as ExposedDatabase
 
-
-//TODO: add function to explicitly initialize this object
 class Database(private val db: ExposedDatabase) {
 	private val rootLogin = "rootuser@example.com" to "1234"
 
@@ -23,12 +21,12 @@ class Database(private val db: ExposedDatabase) {
 		transaction(db) {
 			addLogger(StdOutSqlLogger)
 			SchemaUtils.create(TableSnapshot, TableNode, TableUser)
-			if (!TableNode.exists { TableNode.id eq 1L }) {//TODO: dont hardcode root id
+			if (!TableNode.exists { TableNode.id eq Globals.rootId.value }) {
 				createUser(rootLogin.first, rootLogin.second)
 				createNode(
 					getUser(rootLogin.first, rootLogin.second)?.value ?: error("root user not in database"),
 					"root of all evil",
-				null
+					null
 				)
 			}
 		}
@@ -52,7 +50,8 @@ class Database(private val db: ExposedDatabase) {
 				NodeId(nodeId),
 				UserId(authorId),
 				snapshotPair.first,
-				parent
+				parent,
+				listOf()
 			)
 		}
 	}
@@ -98,21 +97,18 @@ class Database(private val db: ExposedDatabase) {
 
 	fun getNode(position: NodeId): Node? {
 		return transaction(db) {
-			val query = TableNode.select { TableNode.id eq position.value }.firstOrNull()
+			val queryParent = TableNode.select { TableNode.id eq position.value }.firstOrNull()
 				?: return@transaction null
-			val node = Node(
-				NodeId(position.value),
-				UserId(query[TableNode.author]),
-				getSnapshot(query[TableNode.lastSnapshot])!!,
-				query[TableNode.parent].let {
-					if(it != null) NodeId(it) else null
-				} //TODO fix this.rumhampelei
-			)
 
-			val query2 = TableNode.select { TableNode.parent eq node.id.value }//TODO: only query IDs instead of whole nodes
-			val children = query2.map { NodeId(it[TableNode.id]) }
-			node.children.addAll(children)
-			node
+			val queryChildren = TableNode.slice(TableNode.id).select { TableNode.parent eq position.value }
+
+			Node(
+				position,
+				UserId(queryParent[TableNode.author]),
+				getSnapshot(queryParent[TableNode.lastSnapshot])!!,
+				queryParent[TableNode.parent]?.let { NodeId(it) },
+				queryChildren.map { NodeId(it[TableNode.id]) }
+			)
 		}
 	}
 

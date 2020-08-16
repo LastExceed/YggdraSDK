@@ -29,7 +29,7 @@ class Networker(val address: InetSocketAddress) {
 	}
 
 	suspend fun handlePackets() {
-		writer.writePacket(PacketGoTo(NodeId(1L)))//TODO: dont hardcode root ID
+		writer.writePacket(PacketGoTo(Globals.rootId))//TODO: dont hardcode root ID
 		while (isRunning) {
 			try {
 				val packetID = PacketId(reader.readByte())
@@ -62,7 +62,7 @@ class Networker(val address: InetSocketAddress) {
 
 	private suspend fun onPacketNodeReveal() {
 		val nodeRevelation = reader.readPacketNodeReveal()
-		if (nodeRevelation.nodeId.value == 1L) { //TODO: dont hardcode root ID
+		if (nodeRevelation.nodeId == Globals.rootId) {
 			error("root revealed")
 		}
 		val newNodeCached = NodeCached(

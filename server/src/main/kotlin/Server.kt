@@ -60,7 +60,7 @@ class Server(private val database: Database, address: InetSocketAddress) {
 			reader,
 			writer,
 			login,
-			NodeId(1L)//TODO: dont hardcode root ID
+			Globals.rootId
 		)
 		sessions.add(newSession)
 
@@ -115,7 +115,7 @@ class Server(private val database: Database, address: InetSocketAddress) {
 			nodeCreation.parentId
 		)
 
-		val nodeRevelation = PacketNodeReveal(//TODO: use factory function
+		val nodeRevelation = PacketNodeReveal(
 			newNode.id,
 			false,
 			newNode.latestSnapshot,
